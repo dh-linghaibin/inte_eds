@@ -30,7 +30,8 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "anbt_i2c.h"
+#include "gd32f10x.h"
+#include <math.h>
 
 #define ANBT_I2C_READY		0x00
 #define ANBT_I2C_BUS_BUSY	0x01	
@@ -934,7 +935,7 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,unsigned long *timestamp
 //
 #define PRODUCT_WHOAMI	(0x68)
 #define DEFAULT_MPU_HZ  (100)
-#define MAX_PACKET_LENGTH (12)
+//#define MAX_PACKET_LENGTH (12)
 //
 struct gyro_reg_s {
     unsigned char who_am_i;

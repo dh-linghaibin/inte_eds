@@ -77,7 +77,7 @@ static void adc_config(void) {
     adc_discontinuous_mode_config(ADC0, ADC_REGULAR_CHANNEL, 3);                  /* ADC discontinuous mode */
     adc_enable(ADC0); 															  /* enable ADC interface */
     sdelay_ms(1); 																  /* wait adc enable must*/
-    adc_calibration_enable(ADC0); 												  /* ADC calibration and reset calibration */
+	adc_calibration_enable(ADC0); 												  /* ADC calibration and reset calibration */
     adc_dma_mode_enable(ADC0); 													  /* ADC DMA function enable */
 }
 

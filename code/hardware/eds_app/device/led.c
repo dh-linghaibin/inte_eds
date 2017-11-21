@@ -20,8 +20,6 @@ static void led_init(struct _led_obj *led) {
 	GPIO_BOP(GPIOA) = GPIO_PIN_15;
 	GPIO_BOP(GPIOB) = GPIO_PIN_3;
 	GPIO_BOP(GPIOB) = GPIO_PIN_4;
-
-	//printf("led_init successfully!\n\r");
 }
 
 static void led_set(struct _led_obj *led,enum LED_TYPE type,enum LED_NAME name) {
@@ -44,16 +42,17 @@ void led_register(void) {
     struct _led_obj *led = GET_DAV(struct _led_obj);
 	
 	led->pin[0].port = GPIOC;
-	led->pin[0].pin = GPIO_PIN_13;
+	led->pin[0].pin  = GPIO_PIN_13;
 	led->pin[1].port = GPIOA;
-	led->pin[1].pin = GPIO_PIN_15;
+	led->pin[1].pin  = GPIO_PIN_15;
 	led->pin[2].port = GPIOB;
-	led->pin[2].pin = GPIO_PIN_3;
+	led->pin[2].pin  = GPIO_PIN_3;
 	led->pin[3].port = GPIOB;
-	led->pin[3].pin = GPIO_PIN_4;
+	led->pin[3].pin  = GPIO_PIN_4;
 
 	led->init = &led_init;
-	led->set = &led_set;
+	led->set  = &led_set;
+
     register_dev_obj("led",led);
 }
 

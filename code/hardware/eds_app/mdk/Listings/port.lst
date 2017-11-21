@@ -23,7 +23,7 @@ ARM Macro Assembler    Page 1
    14 00000000                 EXPORT           swTaskAtInterrupt
    15 00000000         
    16 00000000                 EXPORT           firstStartTask
-   17 00000000         ;EXPORT  PendSV_Handler
+   17 00000000                 EXPORT           PendSV_Handler
    18 00000000         
    19 00000000         ;*******************************************************
                        *************************************************
@@ -105,7 +105,7 @@ ARM Macro Assembler    Page 2
                        *************************************************
    63 0000000E         
    64 0000000E         firstStartTask
-   65 0000000E 480B            LDR              R0, =NVIC_SYSPRI14 ; Set the Pe
+   65 0000000E 4819            LDR              R0, =NVIC_SYSPRI14 ; Set the Pe
                                                             ndSV exception prio
                                                             rity
    66 00000010 F04F 01FF       LDR              R1, =NVIC_PENDSV_PRI
@@ -116,7 +116,7 @@ ARM Macro Assembler    Page 2
                                                              switch call
    70 00000018 F380 8809       MSR              PSP, R0
    71 0000001C         
-   72 0000001C 4808            LDR              R0, =NVIC_INT_CTRL ; Trigger th
+   72 0000001C 4816            LDR              R0, =NVIC_INT_CTRL ; Trigger th
                                                             e PendSV exception 
                                                             (causes context swi
                                                             tch)
@@ -150,7 +150,7 @@ ARM Macro Assembler    Page 3
                        *************************************************
    87 00000028         
    88 00000028         swTask
-   89 00000028 4805            LDR              R0, =NVIC_INT_CTRL ; Trigger th
+   89 00000028 4813            LDR              R0, =NVIC_INT_CTRL ; Trigger th
                                                             e PendSV exception 
                                                             (causes context swi
                                                             tch)
@@ -175,7 +175,7 @@ ARM Macro Assembler    Page 3
                        *************************************************
   102 00000032         
   103 00000032         swTaskAtInterrupt
-  104 00000032 4803            LDR              R0, =NVIC_INT_CTRL ; Trigger th
+  104 00000032 4811            LDR              R0, =NVIC_INT_CTRL ; Trigger th
                                                             e PendSV exception 
                                                             (causes context swi
                                                             tch)
@@ -250,71 +250,87 @@ ARM Macro Assembler    Page 4
   142 0000003C         ;*******************************************************
                        *************************************************
   143 0000003C         
-  144 0000003C         ;PendSV_Handler
-  145 0000003C         ;CPSID   I                                              
-                            ; Prevent interruption during context switch
-  146 0000003C         ;MRS     R0, PSP                                        
-                            ; PSP is process stack pointer
-  147 0000003C         ;CBZ     R0, PendSV_Handler_nosave                      
-                       ; Skip register save the first time
-  148 0000003C         
+  144 0000003C         PendSV_Handler
+  145 0000003C B672            CPSID            I           ; Prevent interrupt
+                                                            ion during context 
+                                                            switch
+  146 0000003E F3EF 8009       MRS              R0, PSP     ; PSP is process st
+                                                            ack pointer
+  147 00000042 B128            CBZ              R0, PendSV_Handler_nosave ; Ski
+                                                            p register save the
 
 
 
 ARM Macro Assembler    Page 5 
 
 
-  149 0000003C         ;SUBS    R0, R0, #0x20                                  
-                            ; Save remaining regs r4-11 on process stack
-  150 0000003C         ;STM     R0, {R4-R11}
-  151 0000003C         
-  152 0000003C         ;LDR     R1, =curTaskPtr                                
-                            ; curTask->sp = SP;
-  153 0000003C         ;LDR     R1, [R1]
-  154 0000003C         ;STR     R0, [R1]                                       
-                            ; R0 is SP of process being switched out
-  155 0000003C         
-  156 0000003C         ; At this point, entire context of process has been save
+                                                             first time
+  148 00000044         
+  149 00000044 3820            SUBS             R0, R0, #0x20 ; Save remaining 
+                                                            regs r4-11 on proce
+                                                            ss stack
+  150 00000046 E880 0FF0       STM              R0, {R4-R11}
+  151 0000004A         
+  152 0000004A 490C            LDR              R1, =curTaskPtr 
+                                                            ; curTask->sp = SP;
+                                                            
+  153 0000004C 6809            LDR              R1, [R1]
+  154 0000004E 6008            STR              R0, [R1]    ; R0 is SP of proce
+                                                            ss being switched o
+                                                            ut
+  155 00000050         
+  156 00000050         ; At this point, entire context of process has been save
                        d
-  157 0000003C         ;PendSV_Handler_nosave
-  158 0000003C         ;LDR     R0, =curPid                                    
-                         ; curPid = nextPid
-  159 0000003C         ;LDR     R1, =nextPid
-  160 0000003C         ;LDRB    R2, [R1]
-  161 0000003C         ;STRB    R2, [R0]
-  162 0000003C         
-  163 0000003C         ;LDR     R0, =curTaskPtr                                
-                            ; curTaskPtr = nextTaskPtr
-  164 0000003C         ;LDR     R1, =nextTaskPtr
-  165 0000003C         ;LDR     R2, [R1]
-  166 0000003C         ;STR     R2, [R0]
-  167 0000003C         
-  168 0000003C         ;LDR     R0, [R2]                                       
-                            ; R0 is new process SP; SP = OSTCBHighRdy->OSTCBStk
-                       Ptr;
-  169 0000003C         ;LDM     R0, {R4-R11}                                   
-                            ; Restore r4-11 from new process stack
-  170 0000003C         ;ADDS    R0, R0, #0x20
-  171 0000003C         ;MSR     PSP, R0                                        
-                            ; Load PSP with new process SP
-  172 0000003C         ;ORR     LR, LR, #0x04                                  
-                            ; Ensure exception return uses process stack
-  173 0000003C         ;CPSIE   I
-  174 0000003C         ;BX      LR                                             
-                            ; Exception return will restore remaining context
-  175 0000003C         
-  176 0000003C         ;END
-                       
+  157 00000050         PendSV_Handler_nosave
+  158 00000050 480B            LDR              R0, =curPid ; curPid = nextPid
+  159 00000052 490C            LDR              R1, =nextPid
+  160 00000054 780A            LDRB             R2, [R1]
+  161 00000056 7002            STRB             R2, [R0]
+  162 00000058         
+  163 00000058 4808            LDR              R0, =curTaskPtr ; curTaskPtr = 
+                                                            nextTaskPtr
+  164 0000005A 490B            LDR              R1, =nextTaskPtr
+  165 0000005C 680A            LDR              R2, [R1]
+  166 0000005E 6002            STR              R2, [R0]
+  167 00000060         
+  168 00000060 6810            LDR              R0, [R2]    ; R0 is new process
+                                                             SP; SP = OSTCBHigh
+                                                            Rdy->OSTCBStkPtr;
+  169 00000062 E890 0FF0       LDM              R0, {R4-R11} ; Restore r4-11 fr
+                                                            om new process stac
+                                                            k
+  170 00000066 3020            ADDS             R0, R0, #0x20
+  171 00000068 F380 8809       MSR              PSP, R0     ; Load PSP with new
+                                                             process SP
+  172 0000006C F04E 0E04       ORR              LR, LR, #0x04 ; Ensure exceptio
+                                                            n return uses proce
+                                                            ss stack
+  173 00000070 B662            CPSIE            I
+  174 00000072 4770            BX               LR          ; Exception return 
+                                                            will restore remain
+                                                            ing context
+  175 00000074         
+  176 00000074                 END
               E000ED22 
               E000ED04 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend=.\objects\switch.d -o.\objects\switch.o -ID:\03-project\58-inte_ed
+ork --depend=.\objects\port_1.d -o.\objects\port_1.o -ID:\03-project\58-inte_ed
 s\code\hardware\eds_app\mdk\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CM
 SIS\Include -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware
 \Peripherals\inc -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Inc
 lude --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 521" -
+
+
+
+ARM Macro Assembler    Page 6 
+
+
 -predefine="_RTE_ SETA 1" --predefine="GD32F10X_MD SETA 1" --predefine="USE_STD
-PERIPH_DRIVER SETA 1" --list=.\listings\switch.lst ..\frame\os\switch.S
+PERIPH_DRIVER SETA 1" --list=.\listings\port.lst ..\gd32\port.s
 
 
 
@@ -325,59 +341,81 @@ Relocatable symbols
 
 Symbol: .text
    Definitions
-      At line 32 in file ..\frame\os\switch.S
+      At line 32 in file ..\gd32\port.s
    Uses
       None
 Comment: .text unused
+PendSV_Handler 0000003C
+
+Symbol: PendSV_Handler
+   Definitions
+      At line 144 in file ..\gd32\port.s
+   Uses
+      At line 17 in file ..\gd32\port.s
+Comment: PendSV_Handler used once
+PendSV_Handler_nosave 00000050
+
+Symbol: PendSV_Handler_nosave
+   Definitions
+      At line 157 in file ..\gd32\port.s
+   Uses
+      At line 147 in file ..\gd32\port.s
+Comment: PendSV_Handler_nosave used once
 cntHeadZero 00000008
 
 Symbol: cntHeadZero
    Definitions
-      At line 45 in file ..\frame\os\switch.S
+      At line 45 in file ..\gd32\port.s
    Uses
-      At line 11 in file ..\frame\os\switch.S
+      At line 11 in file ..\gd32\port.s
 Comment: cntHeadZero used once
 firstStartTask 0000000E
 
 Symbol: firstStartTask
    Definitions
-      At line 64 in file ..\frame\os\switch.S
+      At line 64 in file ..\gd32\port.s
    Uses
-      At line 16 in file ..\frame\os\switch.S
+      At line 16 in file ..\gd32\port.s
 Comment: firstStartTask used once
 swTask 00000028
 
 Symbol: swTask
    Definitions
-      At line 88 in file ..\frame\os\switch.S
+      At line 88 in file ..\gd32\port.s
    Uses
-      At line 13 in file ..\frame\os\switch.S
+      At line 13 in file ..\gd32\port.s
 Comment: swTask used once
 swTaskAtInterrupt 00000032
 
 Symbol: swTaskAtInterrupt
    Definitions
-      At line 103 in file ..\frame\os\switch.S
+      At line 103 in file ..\gd32\port.s
    Uses
-      At line 14 in file ..\frame\os\switch.S
+      At line 14 in file ..\gd32\port.s
 Comment: swTaskAtInterrupt used once
 taskSwOff 00000004
 
 Symbol: taskSwOff
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
    Definitions
-      At line 41 in file ..\frame\os\switch.S
+      At line 41 in file ..\gd32\port.s
    Uses
-      At line 10 in file ..\frame\os\switch.S
+      At line 10 in file ..\gd32\port.s
 Comment: taskSwOff used once
 taskSwOn 00000000
 
 Symbol: taskSwOn
    Definitions
-      At line 37 in file ..\frame\os\switch.S
+      At line 37 in file ..\gd32\port.s
    Uses
-      At line 9 in file ..\frame\os\switch.S
+      At line 9 in file ..\gd32\port.s
 Comment: taskSwOn used once
-7 symbols
+9 symbols
 
 
 
@@ -388,37 +426,37 @@ NVIC_INT_CTRL E000ED04
 
 Symbol: NVIC_INT_CTRL
    Definitions
-      At line 23 in file ..\frame\os\switch.S
+      At line 23 in file ..\gd32\port.s
    Uses
-      At line 72 in file ..\frame\os\switch.S
-      At line 89 in file ..\frame\os\switch.S
-      At line 104 in file ..\frame\os\switch.S
+      At line 72 in file ..\gd32\port.s
+      At line 89 in file ..\gd32\port.s
+      At line 104 in file ..\gd32\port.s
 
 NVIC_PENDSVSET 10000000
 
 Symbol: NVIC_PENDSVSET
    Definitions
-      At line 26 in file ..\frame\os\switch.S
+      At line 26 in file ..\gd32\port.s
    Uses
-      At line 73 in file ..\frame\os\switch.S
-      At line 90 in file ..\frame\os\switch.S
-      At line 105 in file ..\frame\os\switch.S
+      At line 73 in file ..\gd32\port.s
+      At line 90 in file ..\gd32\port.s
+      At line 105 in file ..\gd32\port.s
 
 NVIC_PENDSV_PRI 000000FF
 
 Symbol: NVIC_PENDSV_PRI
    Definitions
-      At line 25 in file ..\frame\os\switch.S
+      At line 25 in file ..\gd32\port.s
    Uses
-      At line 66 in file ..\frame\os\switch.S
+      At line 66 in file ..\gd32\port.s
 Comment: NVIC_PENDSV_PRI used once
 NVIC_SYSPRI14 E000ED22
 
 Symbol: NVIC_SYSPRI14
    Definitions
-      At line 24 in file ..\frame\os\switch.S
+      At line 24 in file ..\gd32\port.s
    Uses
-      At line 65 in file ..\frame\os\switch.S
+      At line 65 in file ..\gd32\port.s
 Comment: NVIC_SYSPRI14 used once
 4 symbols
 
@@ -431,33 +469,34 @@ curPid 00000000
 
 Symbol: curPid
    Definitions
-      At line 4 in file ..\frame\os\switch.S
+      At line 4 in file ..\gd32\port.s
    Uses
-      None
-Comment: curPid unused
+      At line 158 in file ..\gd32\port.s
+Comment: curPid used once
 curTaskPtr 00000000
 
 Symbol: curTaskPtr
    Definitions
-      At line 6 in file ..\frame\os\switch.S
+      At line 6 in file ..\gd32\port.s
    Uses
-      None
-Comment: curTaskPtr unused
+      At line 152 in file ..\gd32\port.s
+      At line 163 in file ..\gd32\port.s
+
 nextPid 00000000
 
 Symbol: nextPid
    Definitions
-      At line 5 in file ..\frame\os\switch.S
+      At line 5 in file ..\gd32\port.s
    Uses
-      None
-Comment: nextPid unused
+      At line 159 in file ..\gd32\port.s
+Comment: nextPid used once
 nextTaskPtr 00000000
 
 Symbol: nextTaskPtr
    Definitions
-      At line 7 in file ..\frame\os\switch.S
+      At line 7 in file ..\gd32\port.s
    Uses
-      None
-Comment: nextTaskPtr unused
+      At line 164 in file ..\gd32\port.s
+Comment: nextTaskPtr used once
 4 symbols
-352 symbols in table
+354 symbols in table

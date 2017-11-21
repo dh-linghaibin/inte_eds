@@ -1,5 +1,36 @@
-#include <task.h>
+
+#include "l_os.h"
 #include <stdio.h>
+
+static unsigned int idleSp[64];
+static struct task idleTask;
+
+static void idleEntry(void);
+extern void firstStartTask(void); //function in switch.S
+
+void QSysStart(void)
+{
+	/*Create a idle task if user can't create in main.c*/
+	taskCreate(&idleTask,IDLE_PID,idleEntry,idleSp,64,"Idle");
+	
+	/*select the task to be run ,At first time,curTaskPtr is 
+	nextTaskPtr*/
+	updateNextTask();
+	curPid = nextPid;
+	curTaskPtr = nextTaskPtr;
+	
+	firstStartTask();
+}
+
+
+static void idleEntry(void)
+{
+	while(1)
+	{
+		//do nothing ...
+	}
+}
+
 
 unsigned int curPid,nextPid;
 static uint32_t taskRdyBit = 0x00;
@@ -22,6 +53,7 @@ static struct task taskList2; /* task list head */
 static volatile unsigned int ticks = 0;
 static void taskInit(struct task *task);
 
+static unsigned char run_flag = 0;
 /////////////////////////////////////////////////////////////////
 /*
 **Set nextPid and nextTaskPtr,before switch a 
@@ -35,20 +67,23 @@ struct task *updateNextTask(void)
 	struct task *task ;
 	for(int pid=0;pid<MAX_TASK;pid++)
 	{
-		task = taskList[pid];
-		if((task==NULL)||(task->nextRdyTime == 0))
-			continue;
-		else //a task was block,check it's nextRdyTime
-		{
-			if(ticks == task->nextRdyTime){
-				task->nextRdyTime = 0;
-				addPidToRdyBit(pid);
+		
+			task = taskList[pid];
+			if((task==NULL)||(task->nextRdyTime == 0)) {
+				continue;
 			}
-		}
-	}
-	if(taskList2.nextRdyTime != 0) {
+			else //a task was block,check it's nextRdyTime
+			{
+				if(ticks == task->nextRdyTime){
+					task->nextRdyTime = 0;
+					addPidToRdyBit(pid);
+				}
+			}
 		
 	}
+//	if(taskList2.nextRdyTime != 0) {
+//		
+//	}
 	/*Bit		31	30	29	28	27	26...
 	**Zero	0		1		2		3		4		5 ...
 	**Pid		31	30	29	28	27	26...
@@ -86,7 +121,8 @@ int taskCreate(struct task *task,unsigned int pid,taskEntry entry,
 		taskListSet(pid,task);
 		taskInit(task);
 	taskSwOn();
-	
+	run_flag = 1;
+
 	return 0;
 }
 
@@ -263,7 +299,10 @@ static void taskInit(struct task *task)
 ////////////////////////////////////////////////////////////////////////
 void SysTick_Handler(void)
 {
-//	ticks ++;
-//	updateNextTask();
-//	swTask();
+	if(run_flag == 1) {
+		ticks ++;
+		updateNextTask();
+		swTask();
+	}
 }
+

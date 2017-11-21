@@ -2549,5 +2549,27 @@ void AnBT_DMP_MPU6050_SEND_DATA_FUN(void)	//dmp读取函数
 }
 
 
+//		{
+//			unsigned long sensor_timestamp;
+//			short gyro[3], accel[3], sensors;
+//			unsigned char more;
+//			long quat[4];
+//			float Yaw=0.00;
+//			float Roll,Pitch;
 
+//			int a,b,c;
+
+//			dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more);	
+
+//			if (sensors & INV_WXYZ_QUAT )
+//			{
+//				q0=quat[0] / q30;
+//				q1=quat[1] / q30;
+//				q2=quat[2] / q30;
+//				q3=quat[3] / q30;
+//				Pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3; // pitch
+//				Roll = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)* 57.3; // roll
+//				Yaw = 	atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;		//感觉没有价值，注掉
+//				printf("pitch: %.2f    roll:%.2f		yaw:%.2f\r\n",Pitch,Roll,Yaw);		//普通串口输出
+//			}
 
