@@ -1,0 +1,89 @@
+#ifndef _FSM_H_
+#define _FSM_H_
+
+#define MEM_B( x ) ( *( (byte *) (x) ) )
+#define MEM_W( x ) ( *( (word *) (x) ) )
+
+#define MAX( x, y ) ( ((x) > (y)) ? (x) : (y) )
+#define MIN( x, y ) ( ((x) < (y)) ? (x) : (y) )
+
+#define FPOS( type, field ) \
+( (dword) &(( type *) 0)-> field )
+
+#define FSIZ( type, field ) sizeof( ((type *) 0)->field )
+
+
+/****small*********************************************/
+#define TimeDef         unsigned short
+#define LineDef         unsigned char
+#define END             ((TimeDef)-1)
+#define LINE            ((__LINE__%(LineDef)-1)+1)  
+
+#define me  (*cp)
+#define TaskFun(TaskName)     TimeDef TaskName(C_##TaskName *cp) {switch(me.task.lc){default:
+#define Exit            do { me.task.lc=0; return END; }  while(0)
+#define Restart           do { me.task.lc=0; return 0; }  while(0)
+#define EndFun            } Exit; }
+
+#define WaitX(ticks)      do { me.task.lc=LINE; return (ticks); case LINE:;} while(0)
+#define l_WaitX(number,ticks)      do { me.task.lc=(LINE+number); return (ticks); case (LINE+number):;} while(0)
+#define WaitUntil(A)      do { while(!(A)) WaitX(0);} while(0)
+
+#define UpdateTimer(TaskVar)    do { if((TaskVar.task.timer!=0)&&(TaskVar.task.timer!=END)) TaskVar.task.timer--; }  while(0)
+#define RunTask(TaskName,TaskVar) do { if(TaskVar.task.timer==0) TaskVar.task.timer=TaskName(&(TaskVar)); }  while(0)
+
+#define CallSub(SubTaskName,SubTaskVar)    do { WaitX(0);SubTaskVar.task.timer=SubTaskName(&(SubTaskVar));      \
+                  if(SubTaskVar.task.timer!=END) return SubTaskVar.task.timer;} while(0)
+
+#define l_CallSub(number,SubTaskName,SubTaskVar)    do { l_WaitX(number,0);SubTaskVar.task.timer=SubTaskName(&(SubTaskVar));      \
+                  if(SubTaskVar.task.timer!=END) return SubTaskVar.task.timer;} while(0)
+/****************************************************************/
+#define Class(type)         typedef struct C_##type C_##type; struct C_##type
+
+//Class(task)
+//{
+//  TimeDef timer;
+//  LineDef lc;
+//};
+typedef struct C_task C_task; 
+struct C_task {
+  TimeDef timer;
+  LineDef lc;
+};
+
+//#define cortex(name,...)	unsigned short name(C_##name *cp) {	switch(me.task.lc){	default:{  __VA_ARGS__	}}do {me.task.lc=0;return END;}while(0);}
+#define cortex(name,...)	unsigned short name(C_##name *cp) {	switch(me.task.lc){	default:{  __VA_ARGS__	}}}
+
+void runtasks(void);
+
+//unsigned short LedTask2(C_LedTask2 *cp) {
+//	switch(me.task.lc){
+//		default:{
+//			me.timelen=50;
+//			while(1) {
+//				//WaitX(me.timelen-me.timeon);  
+//				do { me.task.lc=LINE; return (0); case LINE:;} while(0);
+//				x = LINE;
+//				do { me.task.lc=LINE; return (me.timelen-me.timeon); case LINE:;} while(0);
+//				USARTSendDMA("C_LedTask2.\r\n");
+//				GPIO_WriteBit(GPIOC,GPIO_Pin_7,(BitAction)!GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_7));
+//				if(x == 20) {
+//					me.pin--;
+//				}
+//				if(me.pin == 0) {
+//					me.pin = 10;
+//					GPIO_WriteBit(GPIOC,GPIO_Pin_7,(BitAction)1);
+//					CallSub(LedTask, led1);
+//				} else {
+//					me.pin--;
+//				}
+//			}
+//		}
+//	} 
+//	do { 
+//		me.task.lc=0; 
+//		return END; 
+//	}while(0); 
+//}
+
+#endif

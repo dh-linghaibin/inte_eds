@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "stm32f10x_usart.h": "c",
+        "stm32f10x_dma.h": "c",
+        "misc.h": "c",
+        "stm32f10x_tim.h": "c",
+        "mini_filter.h": "c",
+        "imu.h": "c",
+        "sram.h": "c"
+    }
+}

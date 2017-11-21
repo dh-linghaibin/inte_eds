@@ -1,0 +1,95 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: ¦ÌVision V5.21.1.0
+Copyright (C) 2016 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 2 2w, w, LIC=LSNNN-YAG7G-EH08P-M9GAT-ZVPYL-9M1C1
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Plus  Version: 5.21a
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 3 (build 300)
+Assembler:       Armasm.exe V5.06 update 3 (build 300)
+Linker/Locator:  ArmLink.exe V5.06 update 3 (build 300)
+Library Manager: ArmAr.exe V5.06 update 3 (build 300)
+Hex Converter:   FromElf.exe V5.06 update 3 (build 300)
+CPU DLL:         SARMCM3.DLL V5.21a
+Dialog DLL:      DCM.DLL V1.13.8.0
+Target DLL:      UL2CM3.DLL V1.158.5.0
+Dialog DLL:      TCM.DLL V1.14.14.0
+ 
+<h2>Project:</h2>
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM\IAP.uvprojx
+Project File Date:  10/29/2017
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 3 (build 300)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'STM32-IAP_MD_VL'
+compiling stm32f10x_it.c...
+compiling main.c...
+compiling system_stm32f10x.c...
+compiling stmflash.c...
+compiling iap.c...
+compiling common.c...
+compiling stm32f10x_exti.c...
+compiling ymodem.c...
+compiling stm32f10x_flash.c...
+compiling stm32f10x_gpio.c...
+compiling stm32f10x_usart.c...
+compiling stm32f10x_rcc.c...
+assembling startup_stm32f10x_md_vl.s...
+compiling core_cm3.c...
+compiling misc.c...
+linking...
+Program Size: Code=4728 RO-data=320 RW-data=48 ZI-data=4352  
+FromELF: creating hex file...
+After Build - User command #1: .\..\Binary\hextobin.bat
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>if exist .\..\MDK-ARM\OUTPUT\STM32-IAP_CL\*.hex (.\..\Binary\hex2bin.exe  .\..\MDK-ARM\OUTPUT\STM32-IAP_CL\*.hex ) 
+hex2bin v1.0.1, Copyright (C) 1999 Jacques Pelletier
+Lowest address = 00000000
+Highest address = 00001463
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>if exist .\..\MDK-ARM\OUTPUT\STM32-IAP_HD\*.hex (.\..\Binary\hex2bin.exe  .\..\MDK-ARM\OUTPUT\STM32-IAP_HD\*.hex ) 
+hex2bin v1.0.1, Copyright (C) 1999 Jacques Pelletier
+Lowest address = 00000000
+Highest address = 000013FF
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>if exist .\..\MDK-ARM\OUTPUT\STM32-IAP_HD_VL\*.hex (.\..\Binary\hex2bin.exe  .\..\MDK-ARM\OUTPUT\STM32-IAP_HD_VL\*.hex ) 
+hex2bin v1.0.1, Copyright (C) 1999 Jacques Pelletier
+Lowest address = 00000000
+Highest address = 00001407
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>if exist .\..\MDK-ARM\OUTPUT\STM32-IAP_MD\*.hex (.\..\Binary\hex2bin.exe  .\..\MDK-ARM\OUTPUT\STM32-IAP_MD\*.hex ) 
+hex2bin v1.0.1, Copyright (C) 1999 Jacques Pelletier
+Lowest address = 00000000
+Highest address = 000013C7
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>if exist .\..\MDK-ARM\OUTPUT\STM32-IAP_MD_VL\*.hex (.\..\Binary\hex2bin.exe  .\..\MDK-ARM\OUTPUT\STM32-IAP_MD_VL\*.hex ) 
+hex2bin v1.0.1, Copyright (C) 1999 Jacques Pelletier
+Lowest address = 00000000
+Highest address = 000013E7
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>if exist .\..\MDK-ARM\OUTPUT\STM32-IAP_XL\*.hex (.\..\Binary\hex2bin.exe  .\..\MDK-ARM\OUTPUT\STM32-IAP_XL\*.hex ) 
+hex2bin v1.0.1, Copyright (C) 1999 Jacques Pelletier
+Lowest address = 00000000
+Highest address = 0000157B
+D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM>exit
+".\OUTPUT\STM32-IAP_MD_VL\STM32-IAP_MD_VL.axf" - 0 Error(s), 0 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.0.0-Beta12.pack
+                ARM::CMSIS:CORE:5.0.0
+                CMSIS (Cortex Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.0.0
+
+<h2>Collection of Component include folders:</h2>
+  D:\Fileprocessing\inbox\stm32iap\stm32-iap-bootloader-master\MDK-ARM\RTE
+  C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include
+  C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.1.0\Device\Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:5.0.0
+Build Time Elapsed:  00:00:04
+</pre>
+</body>
+</html>
