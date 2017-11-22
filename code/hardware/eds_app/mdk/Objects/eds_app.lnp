@@ -16,6 +16,7 @@
 ".\objects\button.o"
 ".\objects\rtc.o"
 ".\objects\iwdg.o"
+".\objects\flash.o"
 ".\objects\iic.o"
 ".\objects\gd32f10x_it.o"
 ".\objects\port.o"

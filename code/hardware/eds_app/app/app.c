@@ -142,62 +142,38 @@ static void device_init(void) {
 
 	mpu6050_obj *mpu6050 = get_device("mpu");
 	if(mpu6050 != NULL) {
-//		mpu6050->init(mpu6050);
+		mpu6050->init(mpu6050);
 //		mpu6050->power_off(mpu6050);
 	}
 }
+
+uint8_t  bbb_data[20] = {0x55,0x12,};
+uint8_t  bbb_data2[20] = {0x15,0x02,};
+uint32_t g_block_address;
 
 int main() {
 	//app_set();
 	systick_config();
 	/* clock enable */
-//	rcu_periph_clock_enable(RCU_PMU);
+	rcu_periph_clock_enable(RCU_PMU);
 //	pmu_wakeup_pin_enable();
 
 	device_init();
-
-	//while(1);
+	
+	fmc_unlock();
+	flash_write_multi_blocks(bbb_data, g_block_address, 0, 2);
+	flash_read_multi_blocks(bbb_data2, g_block_address, 2, 1);
+	 
 	//AnBT_DMP_MPU6050_Init();//6050DMP³õÊ¼»¯
 
-	//fsm_task_on(LedTask);
-	//fsm_task_on(mpu);
-	//sdelay_ms(1000);
-	//pmu_to_deepsleepmode(PMU_LDO_LOWPOWER,WFI_CMD);
-	//led->set(led,TOGGLE,R);
-	//pmu_to_standbymode(WFI_CMD);
+	sdelay_ms(2000);
 	//pmu_to_deepsleepmode(PMU_LDO_NORMAL,WFI_CMD);
-	SystemInit();
+	//pmu_to_standbymode(WFI_CMD);
+	//SystemInit();
 	//led_register();
-	led_obj *led2 = get_device("led");	
-	if(led2 != NULL) {
-		led2->init(led2);
-		led2->set(led2,TOGGLE,R);
-	}
-	
-//	if(mpu6050 != NULL) {
-//		//mpu6050->power_off(mpu6050);
-//	}
-	iwdg_obj *iwdg = get_device("iwdg");
-//	while(1) {
-//		if(led2 != NULL) {
-//			led2->set(led2,TOGGLE,R);
-//		}
-//		sdelay_ms(500);
-//		
-//		if(iwdg != NULL) {
-//			iwdg->reload(iwdg);
-//		}
-//	}
-//	pmu_to_standbymode(WFI_CMD);
+	//while(1);
+//	iwdg_obj *iwdg = get_device("iwdg");
 
-//	sdelay_ms(300);
-//	printf("in seleep \r\n");
-//	pmu_to_deepsleepmode(PMU_LDO_LOWPOWER, WFI_CMD);
-//	ble->init(ble);
-//	printf("out seleep \r\n");
-//	led->set(led,TOGGLE,R);
-	
-	
 	taskCreate(&taskPA5,31,PA5On,spPA5,128,"PA5");
 	taskCreate(&taskPA6,30,PA6On,spPA6,128,"PA6");
 	taskCreate(&taskPA7,29,PA7On,spPA7,128,"PA7");
