@@ -1,3 +1,9 @@
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
 
 #ifndef _DEV_OBJ_H_
 #define _DEV_OBJ_H_

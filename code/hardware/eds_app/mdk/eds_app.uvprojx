@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>GD32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\frame\include;..\device\include;..\gd32\include;..\frame\dmp;..\frame\os</IncludePath>
+              <IncludePath>..\frame\include;..\device\include;..\gd32\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -400,11 +400,6 @@
               <FilePath>..\frame\sram.c</FilePath>
             </File>
             <File>
-              <FileName>fsm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\frame\include\fsm.h</FilePath>
-            </File>
-            <File>
               <FileName>l_config.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\frame\include\l_config.h</FilePath>
@@ -423,6 +418,11 @@
               <FileName>coroutine.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\frame\coroutine.c</FilePath>
+            </File>
+            <File>
+              <FileName>l_os.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\frame\l_os.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -499,25 +499,15 @@
               <FileType>1</FileType>
               <FilePath>..\gd32\gd32f10x_it.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>os</GroupName>
-          <Files>
             <File>
-              <FileName>QSys.c</FileName>
+              <FileName>port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\frame\os\QSys.c</FilePath>
+              <FilePath>..\gd32\port.c</FilePath>
             </File>
             <File>
-              <FileName>task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\frame\os\task.c</FilePath>
-            </File>
-            <File>
-              <FileName>switch.S</FileName>
+              <FileName>port.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\frame\os\switch.S</FilePath>
+              <FilePath>..\gd32\port.s</FilePath>
             </File>
           </Files>
         </Group>

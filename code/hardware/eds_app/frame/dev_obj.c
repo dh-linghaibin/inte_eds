@@ -1,3 +1,10 @@
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
+
 #include "dev_obj.h"
 
 /*头结点*/

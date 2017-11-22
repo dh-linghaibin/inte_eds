@@ -1,3 +1,9 @@
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
 
 #include <stdio.h>
 #include "bluetooth.h"

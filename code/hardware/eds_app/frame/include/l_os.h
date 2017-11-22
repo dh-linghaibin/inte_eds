@@ -1,27 +1,10 @@
 /*
  * This file is part of the 
  *
- * Copyright (c) 2016-2017 Damien P. George
+ * Copyright (c) 2016-2017 linghaibin
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
-* by linghaibin
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
  */
+
 #ifndef _L_OS_H_
 #define _L_OS_H_
 
@@ -29,16 +12,16 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
+//#include <stdint.h>
 
-#define MAX_TASK							32
+#define MAX_TASK	32
 
 /*
 **Next marco you cannot change!
 */
-#define IDLE_PID							(0)
-#define LOWEST_PID						(1)
-#define HIGHEST_PID						(MAX_TASK-1)
+#define IDLE_PID			(0)
+#define LOWEST_PID			(1)
+#define HIGHEST_PID			(MAX_TASK-1)
 
 /*
 **Function in switch.S
@@ -80,7 +63,7 @@ extern struct task *nextTaskPtr;
 struct task *updateNextTask(void);
 
 #define TASK_ERR_NO_MEMORY				-1
-#define TASK_ERR_PID_USED					-2
+#define TASK_ERR_PID_USED				-2
 #define TASK_ERR_PID_ILLEGAL			-3
 #define TASK_ERR_NO_SUCH_TASK			-4
 
@@ -108,15 +91,15 @@ void sleep(int delayTicks);
 
 
 
-#define QSys_Version_Main					((unsigned char)0x00)
-#define QSys_Version_Sub1					((unsigned char)0x00)
-#define QSys_Version_Sub2					((unsigned char)0x00)
-#define QSys_Version_Rc						((unsigned char)0x02)
+#define QSys_Version_Main		((unsigned char)0x00)
+#define QSys_Version_Sub1		((unsigned char)0x00)
+#define QSys_Version_Sub2		((unsigned char)0x00)
+#define QSys_Version_Rc			((unsigned char)0x02)
 
-#define QSys_Version							( (QSys_Version_Main << 24) \
-																	 |(QSys_Version_Sub1 << 16) \
-																	 |(QSys_Version_Sub2 <<  8) \
-																	 |(QSys_Version_Rc				) )
+#define QSys_Version			( (QSys_Version_Main << 24) \
+								|(QSys_Version_Sub1 << 16) \
+								|(QSys_Version_Sub2 <<  8) \
+								|(QSys_Version_Rc				) )
 
 /*
 **this function will nerver return .It's a dead loop

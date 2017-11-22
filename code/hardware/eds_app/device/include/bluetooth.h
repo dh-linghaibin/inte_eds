@@ -1,4 +1,9 @@
-
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
 
 #ifndef _BLUETOOTH_H_
 #define _BLUETOOTH_H_

@@ -1,4 +1,10 @@
-/*伺服系统虚拟化*/
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
+
 #include "servo.h"
 
 static void(*left_limit_cb)(void);  /* 左限位回调 */

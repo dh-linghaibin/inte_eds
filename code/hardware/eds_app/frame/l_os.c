@@ -1,3 +1,9 @@
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
 
 #include "l_os.h"
 #include <stdio.h>
@@ -33,11 +39,9 @@ static void idleEntry(void)
 
 
 unsigned int curPid,nextPid;
-static uint32_t taskRdyBit = 0x00;
+static unsigned int taskRdyBit = 0x00;
 struct task *curTaskPtr,*nextTaskPtr;
 static struct task *taskList[MAX_TASK]={NULL};
-
-static struct task taskList2; /* task list head */
 
 
 #define taskListClean(pid)				(taskList[pid]=NULL)
@@ -81,9 +85,6 @@ struct task *updateNextTask(void)
 			}
 		
 	}
-//	if(taskList2.nextRdyTime != 0) {
-//		
-//	}
 	/*Bit		31	30	29	28	27	26...
 	**Zero	0		1		2		3		4		5 ...
 	**Pid		31	30	29	28	27	26...
@@ -297,8 +298,7 @@ static void taskInit(struct task *task)
 }
 
 ////////////////////////////////////////////////////////////////////////
-void SysTick_Handler(void)
-{
+void SysTick_Handler(void) {
 	if(run_flag == 1) {
 		ticks ++;
 		updateNextTask();

@@ -1,14 +1,9 @@
-/*!
-    \file  gd32f10x_it.c
-    \brief interrupt service routines
-*/
-
 /*
-    Copyright (C) 2017 GigaDevice
-
-    2014-12-26, V1.0.0, firmware for GD32F10x
-    2017-06-20, V2.0.0, firmware for GD32F10x
-*/
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
 
 #include "gd32f10x_it.h"
 

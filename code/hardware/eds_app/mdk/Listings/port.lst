@@ -4,331 +4,337 @@
 ARM Macro Assembler    Page 1 
 
 
-    1 00000000         ;*******************************************************
+    1 00000000         ;/*
+    2 00000000         ;* This file is part of the 
+    3 00000000         ;*
+    4 00000000         ;* Copyright (c) 2016-2017 linghaibin
+    5 00000000         ;*
+    6 00000000         ;*/
+    7 00000000         ;*******************************************************
                        *************************************************
-    2 00000000         ;                                           PUBLIC FUNCT
+    8 00000000         ;                                           PUBLIC FUNCT
                        IONS
-    3 00000000         ;*******************************************************
+    9 00000000         ;*******************************************************
                        *************************************************
-    4 00000000                 EXTERN           curPid
-    5 00000000                 EXTERN           nextPid
-    6 00000000                 EXTERN           curTaskPtr
-    7 00000000                 EXTERN           nextTaskPtr
-    8 00000000         
-    9 00000000                 EXPORT           taskSwOn
-   10 00000000                 EXPORT           taskSwOff
-   11 00000000                 EXPORT           cntHeadZero
-   12 00000000         
-   13 00000000                 EXPORT           swTask
-   14 00000000                 EXPORT           swTaskAtInterrupt
-   15 00000000         
-   16 00000000                 EXPORT           firstStartTask
-   17 00000000                 EXPORT           PendSV_Handler
+   10 00000000                 EXTERN           curPid
+   11 00000000                 EXTERN           nextPid
+   12 00000000                 EXTERN           curTaskPtr
+   13 00000000                 EXTERN           nextTaskPtr
+   14 00000000         
+   15 00000000                 EXPORT           taskSwOn
+   16 00000000                 EXPORT           taskSwOff
+   17 00000000                 EXPORT           cntHeadZero
    18 00000000         
-   19 00000000         ;*******************************************************
+   19 00000000                 EXPORT           swTask
+   20 00000000                 EXPORT           swTaskAtInterrupt
+   21 00000000         
+   22 00000000                 EXPORT           firstStartTask
+   23 00000000                 EXPORT           PendSV_Handler
+   24 00000000         
+   25 00000000         ;*******************************************************
                        *************************************************
-   20 00000000         ;                                                EQUATES
+   26 00000000         ;                                                EQUATES
                        
-   21 00000000         ;*******************************************************
+   27 00000000         ;*******************************************************
                        *************************************************
-   22 00000000         
-   23 00000000 E000ED04 
+   28 00000000         
+   29 00000000 E000ED04 
                        NVIC_INT_CTRL
                                EQU              0xE000ED04  ; Interrupt control
                                                              state register.
-   24 00000000 E000ED22 
+   30 00000000 E000ED22 
                        NVIC_SYSPRI14
                                EQU              0xE000ED22  ; System priority r
                                                             egister (priority 1
                                                             4).
-   25 00000000 000000FF 
+   31 00000000 000000FF 
                        NVIC_PENDSV_PRI
                                EQU              0xFF        ; PendSV priority v
                                                             alue (lowest).
-   26 00000000 10000000 
+   32 00000000 10000000 
                        NVIC_PENDSVSET
                                EQU              0x10000000  ; Value to trigger 
                                                             PendSV exception.
-   27 00000000         
-   28 00000000         ;*******************************************************
+   33 00000000         
+   34 00000000         ;*******************************************************
                        *************************************************
-   29 00000000         ;                                      CODE GENERATION D
+   35 00000000         ;                                      CODE GENERATION D
                        IRECTIVES
-   30 00000000         ;*******************************************************
+   36 00000000         ;*******************************************************
                        *************************************************
-   31 00000000         
-   32 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
-2
-   33 00000000                 THUMB
-   34 00000000                 REQUIRE8
-   35 00000000                 PRESERVE8
-   36 00000000         
+   37 00000000         
 
 
 
 ARM Macro Assembler    Page 2 
 
 
-   37 00000000         taskSwOn
-   38 00000000 B662            CPSIE            I
-   39 00000002 4770            BX               LR
-   40 00000004         
-   41 00000004         taskSwOff
-   42 00000004 B672            CPSID            I
-   43 00000006 4770            BX               LR
-   44 00000008         
-   45 00000008         cntHeadZero
-   46 00000008 FAB0 F080       CLZ              R0,R0
-   47 0000000C 4770            BX               LR
-   48 0000000E         
-   49 0000000E         ;*******************************************************
+   38 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+   39 00000000                 THUMB
+   40 00000000                 REQUIRE8
+   41 00000000                 PRESERVE8
+   42 00000000         
+   43 00000000         taskSwOn
+   44 00000000 B662            CPSIE            I
+   45 00000002 4770            BX               LR
+   46 00000004         
+   47 00000004         taskSwOff
+   48 00000004 B672            CPSID            I
+   49 00000006 4770            BX               LR
+   50 00000008         
+   51 00000008         cntHeadZero
+   52 00000008 FAB0 F080       CLZ              R0,R0
+   53 0000000C 4770            BX               LR
+   54 0000000E         
+   55 0000000E         ;*******************************************************
                        *************************************************
-   50 0000000E         ;                                          START MULTITA
+   56 0000000E         ;                                          START MULTITA
                        SKING
-   51 0000000E         ;                                       void OSStartHigh
+   57 0000000E         ;                                       void OSStartHigh
                        Rdy(void)
-   52 0000000E         ;
-   53 0000000E         ; Note(s) : 1) This function triggers a PendSV exception
+   58 0000000E         ;
+   59 0000000E         ; Note(s) : 1) This function triggers a PendSV exception
                         (essentially, causes a context switch) to cause
-   54 0000000E         ;              the first task to start.
-   55 0000000E         ;
-   56 0000000E         ;           2) OSStartHighRdy() MUST:
-   57 0000000E         ;              a) Setup PendSV exception priority to low
+   60 0000000E         ;              the first task to start.
+   61 0000000E         ;
+   62 0000000E         ;           2) OSStartHighRdy() MUST:
+   63 0000000E         ;              a) Setup PendSV exception priority to low
                        est;
-   58 0000000E         ;              b) Set initial PSP to 0, to tell context 
+   64 0000000E         ;              b) Set initial PSP to 0, to tell context 
                        switcher this is first run;
-   59 0000000E         ;              c) Set OSRunning to TRUE;
-   60 0000000E         ;              d) Trigger PendSV exception;
-   61 0000000E         ;              e) Enable interrupts (tasks will run with
+   65 0000000E         ;              c) Set OSRunning to TRUE;
+   66 0000000E         ;              d) Trigger PendSV exception;
+   67 0000000E         ;              e) Enable interrupts (tasks will run with
                         interrupts enabled).
-   62 0000000E         ;*******************************************************
+   68 0000000E         ;*******************************************************
                        *************************************************
-   63 0000000E         
-   64 0000000E         firstStartTask
-   65 0000000E 4819            LDR              R0, =NVIC_SYSPRI14 ; Set the Pe
+   69 0000000E         
+   70 0000000E         firstStartTask
+   71 0000000E 4819            LDR              R0, =NVIC_SYSPRI14 ; Set the Pe
                                                             ndSV exception prio
                                                             rity
-   66 00000010 F04F 01FF       LDR              R1, =NVIC_PENDSV_PRI
-   67 00000014 7001            STRB             R1, [R0]
-   68 00000016         
-   69 00000016 2000            MOVS             R0, #0      ; Set the PSP to 0 
+   72 00000010 F04F 01FF       LDR              R1, =NVIC_PENDSV_PRI
+   73 00000014 7001            STRB             R1, [R0]
+   74 00000016         
+   75 00000016 2000            MOVS             R0, #0      ; Set the PSP to 0 
                                                             for initial context
                                                              switch call
-   70 00000018 F380 8809       MSR              PSP, R0
-   71 0000001C         
-   72 0000001C 4816            LDR              R0, =NVIC_INT_CTRL ; Trigger th
+   76 00000018 F380 8809       MSR              PSP, R0
+   77 0000001C         
+   78 0000001C 4816            LDR              R0, =NVIC_INT_CTRL ; Trigger th
                                                             e PendSV exception 
                                                             (causes context swi
                                                             tch)
-   73 0000001E F04F 5180       LDR              R1, =NVIC_PENDSVSET
-   74 00000022 6001            STR              R1, [R0]
-   75 00000024         
-   76 00000024 B662            CPSIE            I           ; Enable interrupts
-                                                             at processor l
-   77 00000026 E7FE            B                .           ; Should never get 
-                                                            here
-   78 00000028         
+   79 0000001E F04F 5180       LDR              R1, =NVIC_PENDSVSET
+   80 00000022 6001            STR              R1, [R0]
 
 
 
 ARM Macro Assembler    Page 3 
 
 
-   79 00000028         
-   80 00000028         ;*******************************************************
-                       *************************************************
-   81 00000028         ;                               PERFORM A CONTEXT SWITCH
-                        (From task level)
-   82 00000028         ;                                           void OSCtxSw
-                       (void)
-   83 00000028         ;
-   84 00000028         ; Note(s) : 1) OSCtxSw() is called when OS wants to perf
-                       orm a task context switch.  This function
-   85 00000028         ;              triggers the PendSV exception which is wh
-                       ere the real work is done.
+   81 00000024         
+   82 00000024 B662            CPSIE            I           ; Enable interrupts
+                                                             at processor l
+   83 00000026 E7FE            B                .           ; Should never get 
+                                                            here
+   84 00000028         
+   85 00000028         
    86 00000028         ;*******************************************************
                        *************************************************
-   87 00000028         
-   88 00000028         swTask
-   89 00000028 4813            LDR              R0, =NVIC_INT_CTRL ; Trigger th
+   87 00000028         ;                               PERFORM A CONTEXT SWITCH
+                        (From task level)
+   88 00000028         ;                                           void OSCtxSw
+                       (void)
+   89 00000028         ;
+   90 00000028         ; Note(s) : 1) OSCtxSw() is called when OS wants to perf
+                       orm a task context switch.  This function
+   91 00000028         ;              triggers the PendSV exception which is wh
+                       ere the real work is done.
+   92 00000028         ;*******************************************************
+                       *************************************************
+   93 00000028         
+   94 00000028         swTask
+   95 00000028 4813            LDR              R0, =NVIC_INT_CTRL ; Trigger th
                                                             e PendSV exception 
                                                             (causes context swi
                                                             tch)
-   90 0000002A F04F 5180       LDR              R1, =NVIC_PENDSVSET
-   91 0000002E 6001            STR              R1, [R0]
-   92 00000030 4770            BX               LR
-   93 00000032         
-   94 00000032         ;*******************************************************
+   96 0000002A F04F 5180       LDR              R1, =NVIC_PENDSVSET
+   97 0000002E 6001            STR              R1, [R0]
+   98 00000030 4770            BX               LR
+   99 00000032         
+  100 00000032         ;*******************************************************
                        *************************************************
-   95 00000032         ;                             PERFORM A CONTEXT SWITCH (
+  101 00000032         ;                             PERFORM A CONTEXT SWITCH (
                        From interrupt level)
-   96 00000032         ;                                         void OSIntCtxS
+  102 00000032         ;                                         void OSIntCtxS
                        w(void)
-   97 00000032         ;
-   98 00000032         ; Notes:    1) OSIntCtxSw() is called by OSIntExit() whe
+  103 00000032         ;
+  104 00000032         ; Notes:    1) OSIntCtxSw() is called by OSIntExit() whe
                        n it determines a context switch is needed as
-   99 00000032         ;              the result of an interrupt.  This functio
+  105 00000032         ;              the result of an interrupt.  This functio
                        n simply triggers a PendSV exception which will
-  100 00000032         ;              be handled when there are no more interru
+  106 00000032         ;              be handled when there are no more interru
                        pts active and interrupts are enabled.
-  101 00000032         ;*******************************************************
+  107 00000032         ;*******************************************************
                        *************************************************
-  102 00000032         
-  103 00000032         swTaskAtInterrupt
-  104 00000032 4811            LDR              R0, =NVIC_INT_CTRL ; Trigger th
+  108 00000032         
+  109 00000032         swTaskAtInterrupt
+  110 00000032 4811            LDR              R0, =NVIC_INT_CTRL ; Trigger th
                                                             e PendSV exception 
                                                             (causes context swi
                                                             tch)
-  105 00000034 F04F 5180       LDR              R1, =NVIC_PENDSVSET
-  106 00000038 6001            STR              R1, [R0]
-  107 0000003A 4770            BX               LR
-  108 0000003C         
-  109 0000003C         ;*******************************************************
+  111 00000034 F04F 5180       LDR              R1, =NVIC_PENDSVSET
+  112 00000038 6001            STR              R1, [R0]
+  113 0000003A 4770            BX               LR
+  114 0000003C         
+  115 0000003C         ;*******************************************************
                        *************************************************
-  110 0000003C         ;                                         HANDLE PendSV 
+  116 0000003C         ;                                         HANDLE PendSV 
                        EXCEPTION
-  111 0000003C         ;                                     void OS_CPU_PendSV
-                       Handler(void)
-  112 0000003C         ;
-  113 0000003C         ; Note(s) : 1) PendSV is used to cause a context switch.
-                         This is a recommended method for performing
-  114 0000003C         ;              context switches with Cortex-M3.  This is
 
 
 
 ARM Macro Assembler    Page 4 
 
 
+  117 0000003C         ;                                     void OS_CPU_PendSV
+                       Handler(void)
+  118 0000003C         ;
+  119 0000003C         ; Note(s) : 1) PendSV is used to cause a context switch.
+                         This is a recommended method for performing
+  120 0000003C         ;              context switches with Cortex-M3.  This is
                         because the Cortex-M3 auto-saves half of the
-  115 0000003C         ;              processor context on any exception, and r
+  121 0000003C         ;              processor context on any exception, and r
                        estores same on return from exception.  So only
-  116 0000003C         ;              saving of R4-R11 is required and fixing u
+  122 0000003C         ;              saving of R4-R11 is required and fixing u
                        p the stack pointers.  Using the PendSV exception
-  117 0000003C         ;              this way means that context saving and re
+  123 0000003C         ;              this way means that context saving and re
                        storing is identical whether it is initiated from
-  118 0000003C         ;              a thread or occurs due to an interrupt or
+  124 0000003C         ;              a thread or occurs due to an interrupt or
                         exception.
-  119 0000003C         ;
-  120 0000003C         ;           2) Pseudo-code is:
-  121 0000003C         ;              a) Get the process SP, if 0 then skip (go
+  125 0000003C         ;
+  126 0000003C         ;           2) Pseudo-code is:
+  127 0000003C         ;              a) Get the process SP, if 0 then skip (go
                        to d) the saving part (first context switch);
-  122 0000003C         ;              b) Save remaining regs r4-r11 on process 
+  128 0000003C         ;              b) Save remaining regs r4-r11 on process 
                        stack;
-  123 0000003C         ;              c) Save the process SP in its TCB, OSTCBC
+  129 0000003C         ;              c) Save the process SP in its TCB, OSTCBC
                        ur->OSTCBStkPtr = SP;
-  124 0000003C         ;              d) Call OSTaskSwHook();
-  125 0000003C         ;              e) Get current high priority, OSPrioCur =
+  130 0000003C         ;              d) Call OSTaskSwHook();
+  131 0000003C         ;              e) Get current high priority, OSPrioCur =
                         OSPrioHighRdy;
-  126 0000003C         ;              f) Get current ready thread TCB, OSTCBCur
+  132 0000003C         ;              f) Get current ready thread TCB, OSTCBCur
                         = OSTCBHighRdy;
-  127 0000003C         ;              g) Get new process SP from TCB, SP = OSTC
+  133 0000003C         ;              g) Get new process SP from TCB, SP = OSTC
                        BHighRdy->OSTCBStkPtr;
-  128 0000003C         ;              h) Restore R4-R11 from new process stack;
+  134 0000003C         ;              h) Restore R4-R11 from new process stack;
                        
-  129 0000003C         ;              i) Perform exception return which will re
+  135 0000003C         ;              i) Perform exception return which will re
                        store remaining context.
-  130 0000003C         ;
-  131 0000003C         ;           3) On entry into PendSV handler:
-  132 0000003C         ;              a) The following have been saved on the p
+  136 0000003C         ;
+  137 0000003C         ;           3) On entry into PendSV handler:
+  138 0000003C         ;              a) The following have been saved on the p
                        rocess stack (by processor):
-  133 0000003C         ;                 xPSR, PC, LR, R12, R0-R3
-  134 0000003C         ;              b) Processor mode is switched to Handler 
+  139 0000003C         ;                 xPSR, PC, LR, R12, R0-R3
+  140 0000003C         ;              b) Processor mode is switched to Handler 
                        mode (from Thread mode)
-  135 0000003C         ;              c) Stack is Main stack (switched from Pro
+  141 0000003C         ;              c) Stack is Main stack (switched from Pro
                        cess stack)
-  136 0000003C         ;              d) OSTCBCur      points to the OS_TCB of 
+  142 0000003C         ;              d) OSTCBCur      points to the OS_TCB of 
                        the task to suspend
-  137 0000003C         ;                 OSTCBHighRdy  points to the OS_TCB of 
+  143 0000003C         ;                 OSTCBHighRdy  points to the OS_TCB of 
                        the task to resume
-  138 0000003C         ;
-  139 0000003C         ;           4) Since PendSV is set to lowest priority in
+  144 0000003C         ;
+  145 0000003C         ;           4) Since PendSV is set to lowest priority in
                         the system (by OSStartHighRdy() above), we
-  140 0000003C         ;              know that it will only be run when no oth
+  146 0000003C         ;              know that it will only be run when no oth
                        er exception or interrupt is active, and
-  141 0000003C         ;              therefore safe to assume that context bei
+  147 0000003C         ;              therefore safe to assume that context bei
                        ng switched out was using the process stack (PSP).
-  142 0000003C         ;*******************************************************
+  148 0000003C         ;*******************************************************
                        *************************************************
-  143 0000003C         
-  144 0000003C         PendSV_Handler
-  145 0000003C B672            CPSID            I           ; Prevent interrupt
-                                                            ion during context 
-                                                            switch
-  146 0000003E F3EF 8009       MRS              R0, PSP     ; PSP is process st
-                                                            ack pointer
-  147 00000042 B128            CBZ              R0, PendSV_Handler_nosave ; Ski
-                                                            p register save the
+  149 0000003C         
+  150 0000003C         PendSV_Handler
+  151 0000003C B672            CPSID            I           ; Prevent interrupt
 
 
 
 ARM Macro Assembler    Page 5 
 
 
+                                                            ion during context 
+                                                            switch
+  152 0000003E F3EF 8009       MRS              R0, PSP     ; PSP is process st
+                                                            ack pointer
+  153 00000042 B128            CBZ              R0, PendSV_Handler_nosave ; Ski
+                                                            p register save the
                                                              first time
-  148 00000044         
-  149 00000044 3820            SUBS             R0, R0, #0x20 ; Save remaining 
+  154 00000044         
+  155 00000044 3820            SUBS             R0, R0, #0x20 ; Save remaining 
                                                             regs r4-11 on proce
                                                             ss stack
-  150 00000046 E880 0FF0       STM              R0, {R4-R11}
-  151 0000004A         
-  152 0000004A 490C            LDR              R1, =curTaskPtr 
+  156 00000046 E880 0FF0       STM              R0, {R4-R11}
+  157 0000004A         
+  158 0000004A 490C            LDR              R1, =curTaskPtr 
                                                             ; curTask->sp = SP;
                                                             
-  153 0000004C 6809            LDR              R1, [R1]
-  154 0000004E 6008            STR              R0, [R1]    ; R0 is SP of proce
+  159 0000004C 6809            LDR              R1, [R1]
+  160 0000004E 6008            STR              R0, [R1]    ; R0 is SP of proce
                                                             ss being switched o
                                                             ut
-  155 00000050         
-  156 00000050         ; At this point, entire context of process has been save
+  161 00000050         
+  162 00000050         ; At this point, entire context of process has been save
                        d
-  157 00000050         PendSV_Handler_nosave
-  158 00000050 480B            LDR              R0, =curPid ; curPid = nextPid
-  159 00000052 490C            LDR              R1, =nextPid
-  160 00000054 780A            LDRB             R2, [R1]
-  161 00000056 7002            STRB             R2, [R0]
-  162 00000058         
-  163 00000058 4808            LDR              R0, =curTaskPtr ; curTaskPtr = 
+  163 00000050         PendSV_Handler_nosave
+  164 00000050 480B            LDR              R0, =curPid ; curPid = nextPid
+  165 00000052 490C            LDR              R1, =nextPid
+  166 00000054 780A            LDRB             R2, [R1]
+  167 00000056 7002            STRB             R2, [R0]
+  168 00000058         
+  169 00000058 4808            LDR              R0, =curTaskPtr ; curTaskPtr = 
                                                             nextTaskPtr
-  164 0000005A 490B            LDR              R1, =nextTaskPtr
-  165 0000005C 680A            LDR              R2, [R1]
-  166 0000005E 6002            STR              R2, [R0]
-  167 00000060         
-  168 00000060 6810            LDR              R0, [R2]    ; R0 is new process
+  170 0000005A 490B            LDR              R1, =nextTaskPtr
+  171 0000005C 680A            LDR              R2, [R1]
+  172 0000005E 6002            STR              R2, [R0]
+  173 00000060         
+  174 00000060 6810            LDR              R0, [R2]    ; R0 is new process
                                                              SP; SP = OSTCBHigh
                                                             Rdy->OSTCBStkPtr;
-  169 00000062 E890 0FF0       LDM              R0, {R4-R11} ; Restore r4-11 fr
+  175 00000062 E890 0FF0       LDM              R0, {R4-R11} ; Restore r4-11 fr
                                                             om new process stac
                                                             k
-  170 00000066 3020            ADDS             R0, R0, #0x20
-  171 00000068 F380 8809       MSR              PSP, R0     ; Load PSP with new
+  176 00000066 3020            ADDS             R0, R0, #0x20
+  177 00000068 F380 8809       MSR              PSP, R0     ; Load PSP with new
                                                              process SP
-  172 0000006C F04E 0E04       ORR              LR, LR, #0x04 ; Ensure exceptio
+  178 0000006C F04E 0E04       ORR              LR, LR, #0x04 ; Ensure exceptio
                                                             n return uses proce
                                                             ss stack
-  173 00000070 B662            CPSIE            I
-  174 00000072 4770            BX               LR          ; Exception return 
+  179 00000070 B662            CPSIE            I
+  180 00000072 4770            BX               LR          ; Exception return 
                                                             will restore remain
                                                             ing context
-  175 00000074         
-  176 00000074                 END
+  181 00000074         
+  182 00000074                 END
               E000ED22 
               E000ED04 
               00000000 
               00000000 
               00000000 
               00000000 
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend=.\objects\port_1.d -o.\objects\port_1.o -ID:\03-project\58-inte_ed
-s\code\hardware\eds_app\mdk\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CM
-SIS\Include -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware
-\Peripherals\inc -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Inc
-lude --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 521" -
 
 
 
 ARM Macro Assembler    Page 6 
 
 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
+ork --depend=.\objects\port_1.d -o.\objects\port_1.o -ID:\03-project\58-inte_ed
+s\code\hardware\eds_app\mdk\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CM
+SIS\Include -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware
+\Peripherals\inc -IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Inc
+lude --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 521" -
 -predefine="_RTE_ SETA 1" --predefine="GD32F10X_MD SETA 1" --predefine="USE_STD
 PERIPH_DRIVER SETA 1" --list=.\listings\port.lst ..\gd32\port.s
 
@@ -341,7 +347,7 @@ Relocatable symbols
 
 Symbol: .text
    Definitions
-      At line 32 in file ..\gd32\port.s
+      At line 38 in file ..\gd32\port.s
    Uses
       None
 Comment: .text unused
@@ -349,49 +355,49 @@ PendSV_Handler 0000003C
 
 Symbol: PendSV_Handler
    Definitions
-      At line 144 in file ..\gd32\port.s
+      At line 150 in file ..\gd32\port.s
    Uses
-      At line 17 in file ..\gd32\port.s
+      At line 23 in file ..\gd32\port.s
 Comment: PendSV_Handler used once
 PendSV_Handler_nosave 00000050
 
 Symbol: PendSV_Handler_nosave
    Definitions
-      At line 157 in file ..\gd32\port.s
+      At line 163 in file ..\gd32\port.s
    Uses
-      At line 147 in file ..\gd32\port.s
+      At line 153 in file ..\gd32\port.s
 Comment: PendSV_Handler_nosave used once
 cntHeadZero 00000008
 
 Symbol: cntHeadZero
    Definitions
-      At line 45 in file ..\gd32\port.s
+      At line 51 in file ..\gd32\port.s
    Uses
-      At line 11 in file ..\gd32\port.s
+      At line 17 in file ..\gd32\port.s
 Comment: cntHeadZero used once
 firstStartTask 0000000E
 
 Symbol: firstStartTask
    Definitions
-      At line 64 in file ..\gd32\port.s
+      At line 70 in file ..\gd32\port.s
    Uses
-      At line 16 in file ..\gd32\port.s
+      At line 22 in file ..\gd32\port.s
 Comment: firstStartTask used once
 swTask 00000028
 
 Symbol: swTask
    Definitions
-      At line 88 in file ..\gd32\port.s
+      At line 94 in file ..\gd32\port.s
    Uses
-      At line 13 in file ..\gd32\port.s
+      At line 19 in file ..\gd32\port.s
 Comment: swTask used once
 swTaskAtInterrupt 00000032
 
 Symbol: swTaskAtInterrupt
    Definitions
-      At line 103 in file ..\gd32\port.s
+      At line 109 in file ..\gd32\port.s
    Uses
-      At line 14 in file ..\gd32\port.s
+      At line 20 in file ..\gd32\port.s
 Comment: swTaskAtInterrupt used once
 taskSwOff 00000004
 
@@ -403,17 +409,17 @@ ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 Relocatable symbols
 
    Definitions
-      At line 41 in file ..\gd32\port.s
+      At line 47 in file ..\gd32\port.s
    Uses
-      At line 10 in file ..\gd32\port.s
+      At line 16 in file ..\gd32\port.s
 Comment: taskSwOff used once
 taskSwOn 00000000
 
 Symbol: taskSwOn
    Definitions
-      At line 37 in file ..\gd32\port.s
+      At line 43 in file ..\gd32\port.s
    Uses
-      At line 9 in file ..\gd32\port.s
+      At line 15 in file ..\gd32\port.s
 Comment: taskSwOn used once
 9 symbols
 
@@ -426,37 +432,37 @@ NVIC_INT_CTRL E000ED04
 
 Symbol: NVIC_INT_CTRL
    Definitions
-      At line 23 in file ..\gd32\port.s
+      At line 29 in file ..\gd32\port.s
    Uses
-      At line 72 in file ..\gd32\port.s
-      At line 89 in file ..\gd32\port.s
-      At line 104 in file ..\gd32\port.s
+      At line 78 in file ..\gd32\port.s
+      At line 95 in file ..\gd32\port.s
+      At line 110 in file ..\gd32\port.s
 
 NVIC_PENDSVSET 10000000
 
 Symbol: NVIC_PENDSVSET
    Definitions
-      At line 26 in file ..\gd32\port.s
+      At line 32 in file ..\gd32\port.s
    Uses
-      At line 73 in file ..\gd32\port.s
-      At line 90 in file ..\gd32\port.s
-      At line 105 in file ..\gd32\port.s
+      At line 79 in file ..\gd32\port.s
+      At line 96 in file ..\gd32\port.s
+      At line 111 in file ..\gd32\port.s
 
 NVIC_PENDSV_PRI 000000FF
 
 Symbol: NVIC_PENDSV_PRI
    Definitions
-      At line 25 in file ..\gd32\port.s
+      At line 31 in file ..\gd32\port.s
    Uses
-      At line 66 in file ..\gd32\port.s
+      At line 72 in file ..\gd32\port.s
 Comment: NVIC_PENDSV_PRI used once
 NVIC_SYSPRI14 E000ED22
 
 Symbol: NVIC_SYSPRI14
    Definitions
-      At line 24 in file ..\gd32\port.s
+      At line 30 in file ..\gd32\port.s
    Uses
-      At line 65 in file ..\gd32\port.s
+      At line 71 in file ..\gd32\port.s
 Comment: NVIC_SYSPRI14 used once
 4 symbols
 
@@ -469,34 +475,34 @@ curPid 00000000
 
 Symbol: curPid
    Definitions
-      At line 4 in file ..\gd32\port.s
+      At line 10 in file ..\gd32\port.s
    Uses
-      At line 158 in file ..\gd32\port.s
+      At line 164 in file ..\gd32\port.s
 Comment: curPid used once
 curTaskPtr 00000000
 
 Symbol: curTaskPtr
    Definitions
-      At line 6 in file ..\gd32\port.s
+      At line 12 in file ..\gd32\port.s
    Uses
-      At line 152 in file ..\gd32\port.s
-      At line 163 in file ..\gd32\port.s
+      At line 158 in file ..\gd32\port.s
+      At line 169 in file ..\gd32\port.s
 
 nextPid 00000000
 
 Symbol: nextPid
    Definitions
-      At line 5 in file ..\gd32\port.s
+      At line 11 in file ..\gd32\port.s
    Uses
-      At line 159 in file ..\gd32\port.s
+      At line 165 in file ..\gd32\port.s
 Comment: nextPid used once
 nextTaskPtr 00000000
 
 Symbol: nextTaskPtr
    Definitions
-      At line 7 in file ..\gd32\port.s
+      At line 13 in file ..\gd32\port.s
    Uses
-      At line 164 in file ..\gd32\port.s
+      At line 170 in file ..\gd32\port.s
 Comment: nextTaskPtr used once
 4 symbols
 354 symbols in table

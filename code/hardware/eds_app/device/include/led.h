@@ -1,3 +1,10 @@
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
+
 #ifndef _LED_H_
 #define _LED_H_
 
