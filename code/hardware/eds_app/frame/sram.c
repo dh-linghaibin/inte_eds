@@ -11,7 +11,7 @@
 
 //以下定义大小是为了直观的看到程序运行分配结果，取10进制数
 //整个SRAM大小
-#define SRAM_SIZE (2500)
+#define SRAM_SIZE (3000)
 //堆分块大小
 #define HeapBlockSIZE (100)
 

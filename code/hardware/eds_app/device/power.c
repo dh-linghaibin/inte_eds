@@ -107,16 +107,22 @@ static int power_power_on(struct _power_obj *power) {
 
 uint16_t power_get_battery(struct _power_obj * power) {
 	adc_software_trigger_enable(ADC0, ADC_REGULAR_CHANNEL); /* ADC software trigger enable */
+	return (uint16_t)( (990*adc_value[0])/4096);
+}
+
+uint16_t power_get_moto_current(struct _power_obj * power) {
+	adc_software_trigger_enable(ADC0, ADC_REGULAR_CHANNEL); /* ADC software trigger enable */
 	return (uint16_t)( (990*adc_value[1])/4096);
 }
 
 void power_register(void) {
 	struct _power_obj *power = GET_DAV(struct _power_obj);
 	
-	power->init        = &power_init;
-	power->get_battery = &power_get_battery;
-	power->power_off   = &power_power_off;
-	power->power_on	   = &power_power_on;
+	power->init        		= &power_init;
+	power->get_battery 		= &power_get_battery;
+	power->power_off   		= &power_power_off;
+	power->power_on	   		= &power_power_on;
+	power->get_moto_current = &power_get_moto_current;
 
     register_dev_obj("pow",power);
 }

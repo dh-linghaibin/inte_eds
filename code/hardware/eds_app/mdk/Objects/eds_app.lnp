@@ -1,5 +1,7 @@
 --cpu Cortex-M3
 ".\objects\app.o"
+".\objects\device.o"
+".\objects\task_motion.o"
 ".\objects\dev_obj.o"
 ".\objects\sram.o"
 ".\objects\s_delay.o"

@@ -1,3 +1,10 @@
+/*
+ * This file is part of the 
+ *
+ * Copyright (c) 2016-2017 linghaibin
+ *
+ */
+
 #ifndef _FSM_H_
 #define _FSM_H_
 
@@ -53,6 +60,8 @@ Class(task) {
 
 //#define cortex(name,...)	unsigned short name(C_##name *cp) {	switch(me.task.lc){	default:{  __VA_ARGS__	}}do {me.task.lc=0;return END;}while(0);}
 #define fsm_initialiser(name,...)	unsigned short name(C_##name *cp) {	switch(me.task.lc){	default:{  __VA_ARGS__	}}do {me.task.lc=0;return END;}while(0);}
+#define fsm_init_name(name) 		unsigned short name(C_##name *cp) {	switch(me.task.lc){	default:{
+#define fsm_end						}}do {me.task.lc=0;return END;}while(0);}
 
 #define simple_fsm(name,...)	\
 	Class(name) {	\
@@ -69,7 +78,6 @@ Class(task) {
 
 /*声明*/
 //#define extern_fsm_initialiser(name) typedef struct C_##name C_##name; C_##name l##neme;unsigned short name(C_##name *cp) 
-
 /*任务参数初始化*/
 #define fsm_task_init(name) l##name.task.run = 0;l##name.task.timer = 0,l##name.task.lc = 0
 /*任务标志位 打开*/

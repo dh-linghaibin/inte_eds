@@ -6,23 +6,20 @@
  */
 
 #include "mpu6050_dmp.h"
+#include "iic.h"
 
-void AnBT_DMP_Delay_us(uint32_t dly)
-{
+void mpu6050_dmp_delay_us(uint32_t dly) {
 	uint8_t i;
 	while(dly--) for(i=0;i<10;i++);
 }
-//
-void AnBT_DMP_Delay_ms(uint32_t dly)
-{
-	while(dly--) AnBT_DMP_Delay_us(1000);
+
+void mpu6050_dmp_delay_ms(uint32_t dly) {
+	while(dly--) mpu6050_dmp_delay_us(1000);
 }
-//
 
-uint8_t AnBT_DMP_I2C_Write(uint8_t anbt_dev_addr, uint8_t anbt_reg_addr, uint8_t anbt_i2c_len, uint8_t *anbt_i2c_data_buf)
-{		
 
-		/* wait until I2C bus is idle */
+uint8_t mpu6050_dmp_iic_write(uint8_t anbt_dev_addr, uint8_t anbt_reg_addr, uint8_t anbt_i2c_len, uint8_t *anbt_i2c_data_buf) {		
+	/* wait until I2C bus is idle */
     while(i2c_flag_get(I2C0, I2C_FLAG_I2CBSY));
     /* send a start condition to I2C bus */
     i2c_start_on_bus(I2C0);
@@ -52,7 +49,8 @@ uint8_t AnBT_DMP_I2C_Write(uint8_t anbt_dev_addr, uint8_t anbt_reg_addr, uint8_t
     while(I2C_CTL0(I2C0)&0x0200);
 	return 0x00;
 }
-uint8_t AnBT_DMP_I2C_Read(uint8_t anbt_dev_addr, uint8_t anbt_reg_addr, uint8_t anbt_i2c_len, uint8_t *anbt_i2c_data_buf) {
+
+uint8_t mpu6050_dmp_iic_read(uint8_t anbt_dev_addr, uint8_t anbt_reg_addr, uint8_t anbt_i2c_len, uint8_t *anbt_i2c_data_buf) {
 	/* wait until I2C bus is idle */
     while(i2c_flag_get(I2C0, I2C_FLAG_I2CBSY));
     /* send a start condition to I2C bus */
@@ -526,8 +524,7 @@ static struct dmp_s dmp={
  *  @brief  Load the DMP with this image.
  *  @return 0 if successful.
  */
-int dmp_load_motion_driver_firmware(void)
-{
+int dmp_load_motion_driver_firmware(void) {
     return mpu_load_firmware(DMP_CODE_SIZE, dmp_memory, sStartAddress,DMP_SAMPLE_RATE);
 }
 
@@ -538,8 +535,7 @@ int dmp_load_motion_driver_firmware(void)
  *  @param[in]  orient  Gyro and accel orientation in body frame.
  *  @return     0 if successful.
  */
-int dmp_set_orientation(unsigned short orient)
-{
+int dmp_set_orientation(unsigned short orient) {
     unsigned char gyro_regs[3], accel_regs[3];
     const unsigned char gyro_axes[3] = {DINA4C, DINACD, DINA6C};
     const unsigned char accel_axes[3] = {DINA0C, DINAC9, DINA2C};
@@ -593,8 +589,7 @@ int dmp_set_orientation(unsigned short orient)
  *  @param[in]  bias    Gyro biases in q16.
  *  @return     0 if successful.
  */
-int dmp_set_gyro_bias(long *bias)
-{
+int dmp_set_gyro_bias(long *bias) {
     long gyro_bias_body[3];
     unsigned char regs[4];
 
@@ -639,8 +634,7 @@ int dmp_set_gyro_bias(long *bias)
  *  @param[in]  bias    Accel biases in q16.
  *  @return     0 if successful.		成功返回0
  */
-int dmp_set_accel_bias(long *bias)
-{
+int dmp_set_accel_bias(long *bias) {
     long accel_bias_body[3];
     unsigned char regs[12];
     long long accel_sf;
@@ -691,8 +685,7 @@ int dmp_set_accel_bias(long *bias)
  *  @param[in]  rate    Desired fifo rate (Hz).
  *  @return     0 if successful.
  */
-int dmp_set_fifo_rate(unsigned short rate)
-{
+int dmp_set_fifo_rate(unsigned short rate) {
     const unsigned char regs_end[12] = {DINAFE, DINAF2, DINAAB,
         0xc4, DINAAA, DINAF1, DINADF, DINADF, 0xBB, 0xAF, DINADF, DINADF};
     unsigned short div;
@@ -717,8 +710,7 @@ int dmp_set_fifo_rate(unsigned short rate)
  *  @param[out] rate    Current fifo rate (Hz).
  *  @return     0 if successful.
  */
-int dmp_get_fifo_rate(unsigned short *rate)
-{
+int dmp_get_fifo_rate(unsigned short *rate) {
     rate[0] = dmp.fifo_rate;
     return 0;
 }
@@ -729,8 +721,7 @@ int dmp_get_fifo_rate(unsigned short *rate)
  *  @param[in]  thresh  Tap threshold, in mg/ms.
  *  @return     0 if successful.
  */
-int dmp_set_tap_thresh(unsigned char axis, unsigned short thresh)
-{
+int dmp_set_tap_thresh(unsigned char axis, unsigned short thresh) {
     unsigned char tmp[4], accel_fsr;
     float scaled_thresh;
     unsigned short dmp_thresh, dmp_thresh_2;
@@ -795,8 +786,7 @@ int dmp_set_tap_thresh(unsigned char axis, unsigned short thresh)
  *  @param[in]  axis    1, 2, and 4 for XYZ, respectively.
  *  @return     0 if successful.
  */
-int dmp_set_tap_axes(unsigned char axis)
-{
+int dmp_set_tap_axes(unsigned char axis) {
     unsigned char tmp = 0;
 
     if (axis & TAP_X)
@@ -813,8 +803,7 @@ int dmp_set_tap_axes(unsigned char axis)
  *  @param[in]  min_taps    Minimum consecutive taps (1-4).
  *  @return     0 if successful.
  */
-int dmp_set_tap_count(unsigned char min_taps)
-{
+int dmp_set_tap_count(unsigned char min_taps) {
     unsigned char tmp;
 
     if (min_taps < 1)
@@ -831,8 +820,7 @@ int dmp_set_tap_count(unsigned char min_taps)
  *  @param[in]  time    Milliseconds between taps.
  *  @return     0 if successful.
  */
-int dmp_set_tap_time(unsigned short time)
-{
+int dmp_set_tap_time(unsigned short time) {
     unsigned short dmp_time;
     unsigned char tmp[2];
 
@@ -847,8 +835,7 @@ int dmp_set_tap_time(unsigned short time)
  *  @param[in]  time    Max milliseconds between taps.
  *  @return     0 if successful.
  */
-int dmp_set_tap_time_multi(unsigned short time)
-{
+int dmp_set_tap_time_multi(unsigned short time) {
     unsigned short dmp_time;
     unsigned char tmp[2];
 
@@ -865,8 +852,7 @@ int dmp_set_tap_time_multi(unsigned short time)
  *  @param[in]  thresh  Gyro threshold in dps.
  *  @return     0 if successful.
  */
-int dmp_set_shake_reject_thresh(long sf, unsigned short thresh)
-{
+int dmp_set_shake_reject_thresh(long sf, unsigned short thresh) {
     unsigned char tmp[4];
     long thresh_scaled = sf / 1000 * thresh;
     tmp[0] = (unsigned char)(((long)thresh_scaled >> 24) & 0xFF);
@@ -884,8 +870,7 @@ int dmp_set_shake_reject_thresh(long sf, unsigned short thresh)
  *  @param[in]  time    Time in milliseconds.
  *  @return     0 if successful.
  */
-int dmp_set_shake_reject_time(unsigned short time)
-{
+int dmp_set_shake_reject_time(unsigned short time) {
     unsigned char tmp[2];
 
     time /= (1000 / DMP_SAMPLE_RATE);
@@ -902,8 +887,7 @@ int dmp_set_shake_reject_time(unsigned short time)
  *  @param[in]  time    Time in milliseconds.
  *  @return     0 if successful.
  */
-int dmp_set_shake_reject_timeout(unsigned short time)
-{
+int dmp_set_shake_reject_timeout(unsigned short time) {
     unsigned char tmp[2];
 
     time /= (1000 / DMP_SAMPLE_RATE);
@@ -917,8 +901,7 @@ int dmp_set_shake_reject_timeout(unsigned short time)
  *  @param[out] count   Number of steps detected.
  *  @return     0 if successful.
  */
-int dmp_get_pedometer_step_count(unsigned long *count)
-{
+int dmp_get_pedometer_step_count(unsigned long *count) {
     unsigned char tmp[4];
     if (!count)
         return -1;
@@ -938,8 +921,7 @@ int dmp_get_pedometer_step_count(unsigned long *count)
  *  @param[in]  count   New step count.
  *  @return     0 if successful.
  */
-int dmp_set_pedometer_step_count(unsigned long count)
-{
+int dmp_set_pedometer_step_count(unsigned long count) {
     unsigned char tmp[4];
 
     tmp[0] = (unsigned char)((count >> 24) & 0xFF);
@@ -954,8 +936,7 @@ int dmp_set_pedometer_step_count(unsigned long count)
  *  @param[in]  time    Walk time in milliseconds.
  *  @return     0 if successful.
  */
-int dmp_get_pedometer_walk_time(unsigned long *time)
-{
+int dmp_get_pedometer_walk_time(unsigned long *time) {
     unsigned char tmp[4];
     if (!time)
         return -1;
@@ -974,8 +955,7 @@ int dmp_get_pedometer_walk_time(unsigned long *time)
  *  a race condition if called while the pedometer is enabled.
  *  @param[in]  time    New walk time in milliseconds.
  */
-int dmp_set_pedometer_walk_time(unsigned long time)
-{
+int dmp_set_pedometer_walk_time(unsigned long time) {
     unsigned char tmp[4];
 
     time /= 20;
@@ -1004,8 +984,7 @@ int dmp_set_pedometer_walk_time(unsigned long time)
  *  @param[in]  mask    Mask of features to enable.
  *  @return     0 if successful.
  */
-int dmp_enable_feature(unsigned short mask)
-{
+int dmp_enable_feature(unsigned short mask) {
     unsigned char tmp[10];
 
     /* TODO: All of these settings can probably be integrated into the default
@@ -1126,8 +1105,7 @@ int dmp_enable_feature(unsigned short mask)
  *  @param[out] Mask of enabled features.
  *  @return     0 if successful.
  */
-int dmp_get_enabled_features(unsigned short *mask)
-{
+int dmp_get_enabled_features(unsigned short *mask) {
     mask[0] = dmp.feature_mask;
     return 0;
 }
@@ -1144,8 +1122,7 @@ int dmp_get_enabled_features(unsigned short *mask)
  *  @param[in]  enable  1 to enable gyro calibration.
  *  @return     0 if successful.
  */
-int dmp_enable_gyro_cal(unsigned char enable)
-{
+int dmp_enable_gyro_cal(unsigned char enable) {
     if (enable) {
         unsigned char regs[9] = {0xb8, 0xaa, 0xb3, 0x8d, 0xb4, 0x98, 0x0d, 0x35, 0x5d};
         return mpu_write_mem(CFG_MOTION_BIAS, 9, regs);
@@ -1162,8 +1139,7 @@ int dmp_enable_gyro_cal(unsigned char enable)
  *  @param[in]  enable  1 to enable 3-axis quaternion.
  *  @return     0 if successful.
  */
-int dmp_enable_lp_quat(unsigned char enable)
-{
+int dmp_enable_lp_quat(unsigned char enable) {
     unsigned char regs[4];
     if (enable) {
         regs[0] = DINBC0;
@@ -1186,8 +1162,7 @@ int dmp_enable_lp_quat(unsigned char enable)
  *  @param[in]   enable  1 to enable 6-axis quaternion.
  *  @return      0 if successful.
  */
-int dmp_enable_6x_lp_quat(unsigned char enable)
-{
+int dmp_enable_6x_lp_quat(unsigned char enable) {
     unsigned char regs[4];
     if (enable) {
         regs[0] = DINA20;
@@ -1196,9 +1171,7 @@ int dmp_enable_6x_lp_quat(unsigned char enable)
         regs[3] = DINA38;
     } else
         memset(regs, 0xA3, 4);
-
     mpu_write_mem(CFG_8, 4, regs);
-
     return mpu_reset_fifo();
 }
 
@@ -1207,8 +1180,7 @@ int dmp_enable_6x_lp_quat(unsigned char enable)
  *  @param[in]  gesture Gesture data from DMP packet.
  *  @return     0 if successful.
  */
-static int decode_gesture(unsigned char *gesture)
-{
+static int decode_gesture(unsigned char *gesture) {
     unsigned char tap, android_orient;
 
     android_orient = gesture[3] & 0xC0;
@@ -1239,8 +1211,7 @@ static int decode_gesture(unsigned char *gesture)
  *  @param[in]  mode    DMP_INT_GESTURE or DMP_INT_CONTINUOUS.
  *  @return     0 if successful.
  */
-int dmp_set_interrupt_mode(unsigned char mode)
-{
+int dmp_set_interrupt_mode(unsigned char mode) {
     const unsigned char regs_continuous[11] =
         {0xd8, 0xb1, 0xb9, 0xf3, 0x8b, 0xa3, 0x91, 0xb6, 0x09, 0xb4, 0xd9};
     const unsigned char regs_gesture[11] =
@@ -1279,8 +1250,7 @@ int dmp_set_interrupt_mode(unsigned char mode)
  *  @return     0 if successful.	成功返回0
  */
 int dmp_read_fifo(short *gyro, short *accel, long *quat,
-    unsigned long *timestamp, short *sensors, unsigned char *more)
-{
+    unsigned long *timestamp, short *sensors, unsigned char *more) {
     unsigned char fifo_data[MAX_PACKET_LENGTH];
     unsigned char ii = 0;
 
@@ -1371,8 +1341,7 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,
  *  @param[in]  func    Callback function.
  *  @return     0 if successful.
  */
-int dmp_register_tap_cb(void (*func)(unsigned char, unsigned char))
-{
+int dmp_register_tap_cb(void (*func)(unsigned char, unsigned char)) {
     dmp.tap_cb = func;
     return 0;
 }
@@ -1382,13 +1351,10 @@ int dmp_register_tap_cb(void (*func)(unsigned char, unsigned char))
  *  @param[in]  func    Callback function.
  *  @return     0 if successful.
  */
-int dmp_register_android_orient_cb(void (*func)(unsigned char))
-{
+int dmp_register_android_orient_cb(void (*func)(unsigned char)) {
     dmp.android_orient_cb = func;
     return 0;
 }
-
-
 
 
 long anbt_mpu6050_quat_data[4];
@@ -1455,8 +1421,7 @@ static struct gyro_state_s st={
   &test
 };
 //
-int mpu_set_gyro_fsr(unsigned short fsr)
-{
+int mpu_set_gyro_fsr(unsigned short fsr) {
     unsigned char data;
 
     if (!(st.chip_cfg.sensors))
@@ -1481,13 +1446,12 @@ int mpu_set_gyro_fsr(unsigned short fsr)
 
     if (st.chip_cfg.gyro_fsr == (data >> 3))
         return 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->gyro_cfg, 1, &data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->gyro_cfg, 1, &data))
         return -1;
     st.chip_cfg.gyro_fsr = data >> 3;
     return 0;
 }
-int mpu_set_accel_fsr(unsigned char fsr)
-{
+int mpu_set_accel_fsr(unsigned char fsr) {
     unsigned char data;
 
     if (!(st.chip_cfg.sensors))
@@ -1511,13 +1475,12 @@ int mpu_set_accel_fsr(unsigned char fsr)
     }
     if (st.chip_cfg.accel_fsr == (data >> 3))
         return 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->accel_cfg, 1, &data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->accel_cfg, 1, &data))
         return -1;
     st.chip_cfg.accel_fsr = data >> 3;
     return 0;
 }
-int mpu_set_lpf(unsigned short lpf)
-{
+int mpu_set_lpf(unsigned short lpf) {
     unsigned char data;
 
     if (!(st.chip_cfg.sensors))
@@ -1538,14 +1501,13 @@ int mpu_set_lpf(unsigned short lpf)
 
     if (st.chip_cfg.lpf == data)
         return 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->lpf, 1, &data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->lpf, 1, &data))
         return -1;
     st.chip_cfg.lpf = data;
     return 0;
 }
-//
-int mpu_set_int_latched(unsigned char enable)
-{
+
+int mpu_set_int_latched(unsigned char enable) {
     unsigned char tmp;
     if (st.chip_cfg.latched_int == enable)
         return 0;
@@ -1558,14 +1520,13 @@ int mpu_set_int_latched(unsigned char enable)
         tmp |= BIT_BYPASS_EN;
     if (st.chip_cfg.active_low_int)
         tmp |= BIT_ACTL;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
         return -1;
     st.chip_cfg.latched_int = enable;
     return 0;
 }
 
-static int set_int_enable(unsigned char enable)
-{
+static int set_int_enable(unsigned char enable) {
     unsigned char tmp;
 
     if (st.chip_cfg.dmp_on) {
@@ -1573,7 +1534,7 @@ static int set_int_enable(unsigned char enable)
             tmp = BIT_DMP_INT_EN;
         else
             tmp = 0x00;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_enable, 1, &tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_enable, 1, &tmp))
             return -1;
         st.chip_cfg.int_enable = tmp;
     } else {
@@ -1585,65 +1546,64 @@ static int set_int_enable(unsigned char enable)
             tmp = BIT_DATA_RDY_EN;
         else
             tmp = 0x00;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_enable, 1, &tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_enable, 1, &tmp))
             return -1;
         st.chip_cfg.int_enable = tmp;
     }
     return 0;
 }
 //
-int mpu_reset_fifo(void)
-{
+int mpu_reset_fifo(void) {
     unsigned char data;
 
     if (!(st.chip_cfg.sensors))
         return -1;
 
     data = 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_enable, 1, &data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_enable, 1, &data))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->fifo_en, 1, &data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->fifo_en, 1, &data))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
         return -1;
 
     if (st.chip_cfg.dmp_on) {
         data = BIT_FIFO_RST | BIT_DMP_RST;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        AnBT_DMP_Delay_ms(50);
+        mpu6050_dmp_delay_ms(50);
         data = BIT_DMP_EN | BIT_FIFO_EN;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             data |= BIT_AUX_IF_EN;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
         if (st.chip_cfg.int_enable)
             data = BIT_DMP_INT_EN;
         else
             data = 0;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_enable, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_enable, 1, &data))
             return -1;
         data = 0;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->fifo_en, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->fifo_en, 1, &data))
             return -1;
     } else {
         data = BIT_FIFO_RST;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
         if (st.chip_cfg.bypass_mode || !(st.chip_cfg.sensors & INV_XYZ_COMPASS))
             data = BIT_FIFO_EN;
         else
             data = BIT_FIFO_EN | BIT_AUX_IF_EN;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        AnBT_DMP_Delay_ms(50);
+        mpu6050_dmp_delay_ms(50);
         if (st.chip_cfg.int_enable)
             data = BIT_DATA_RDY_EN;
         else
             data = 0;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_enable, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_enable, 1, &data))
             return -1;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->fifo_en, 1, &st.chip_cfg.fifo_enable))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->fifo_en, 1, &st.chip_cfg.fifo_enable))
             return -1;
     }
     return 0;
@@ -1657,8 +1617,7 @@ int mpu_reset_fifo(void)
  *  @param[in]  sensors Mask of sensors to push to FIFO.
  *  @return     0 if successful.
  */
-int mpu_configure_fifo(unsigned char sensors)
-{
+int mpu_configure_fifo(unsigned char sensors) {
     unsigned char prev;
     int result = 0;
 
@@ -1689,8 +1648,7 @@ int mpu_configure_fifo(unsigned char sensors)
     return result;
 }
 //
-int mpu_lp_accel_mode(unsigned char rate)
-{
+int mpu_lp_accel_mode(unsigned char rate) {
     unsigned char tmp[2];
 
     if (rate > 40)
@@ -1700,7 +1658,7 @@ int mpu_lp_accel_mode(unsigned char rate)
         mpu_set_int_latched(0);
         tmp[0] = 0;
         tmp[1] = BIT_STBY_XYZG;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 2, tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 2, tmp))
             return -1;
         st.chip_cfg.lp_accel_mode = 0;
         return 0;
@@ -1722,7 +1680,7 @@ int mpu_lp_accel_mode(unsigned char rate)
         mpu_set_lpf(20);
     }
     tmp[1] = (tmp[1] << 6) | BIT_STBY_XYZG;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 2, tmp))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 2, tmp))
         return -1;
 
     st.chip_cfg.sensors = INV_XYZ_ACCEL;
@@ -1732,8 +1690,8 @@ int mpu_lp_accel_mode(unsigned char rate)
 
     return 0;
 }
-int mpu_set_sample_rate(unsigned short rate)
-{
+
+int mpu_set_sample_rate(unsigned short rate) {
     unsigned char data;
 
     if (!(st.chip_cfg.sensors))
@@ -1759,7 +1717,7 @@ int mpu_set_sample_rate(unsigned short rate)
             rate = 1000;
 
         data = 1000 / rate - 1;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->rate_div, 1, &data))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->rate_div, 1, &data))
             return -1;
 
         st.chip_cfg.sample_rate = 1000 / (1 + data);
@@ -1770,53 +1728,52 @@ int mpu_set_sample_rate(unsigned short rate)
         return 0;
     }
 }
-int mpu_set_bypass(unsigned char bypass_on)
-{
+
+int mpu_set_bypass(unsigned char bypass_on) {
     unsigned char tmp;
 
     if (st.chip_cfg.bypass_mode == bypass_on)
         return 0;
 
     if (bypass_on) {
-        if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
+        if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
         tmp &= ~BIT_AUX_IF_EN;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
-        AnBT_DMP_Delay_ms(3);
+        mpu6050_dmp_delay_ms(3);
         tmp = BIT_BYPASS_EN;
         if (st.chip_cfg.active_low_int)
             tmp |= BIT_ACTL;
         if (st.chip_cfg.latched_int)
             tmp |= BIT_LATCH_EN | BIT_ANY_RD_CLR;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
             return -1;
     } else {
         /* Enable I2C master mode if compass is being used. */
-        if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
+        if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             tmp |= BIT_AUX_IF_EN;
         else
             tmp &= ~BIT_AUX_IF_EN;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
-        AnBT_DMP_Delay_ms(3);
+        mpu6050_dmp_delay_ms(3);
         if (st.chip_cfg.active_low_int)
             tmp = BIT_ACTL;
         else
             tmp = 0;
         if (st.chip_cfg.latched_int)
             tmp |= BIT_LATCH_EN | BIT_ANY_RD_CLR;
-        if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
+        if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_pin_cfg, 1, &tmp))
             return -1;
     }
     st.chip_cfg.bypass_mode = bypass_on;
     return 0;
 }
 
-int mpu_set_sensors(unsigned char sensors)
-{
+int mpu_set_sensors(unsigned char sensors) {
     unsigned char data;
 
     if (sensors & INV_XYZ_GYRO)
@@ -1825,7 +1782,7 @@ int mpu_set_sensors(unsigned char sensors)
         data = 0;
     else
         data = BIT_SLEEP;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 1, &data)) {
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, &data)) {
         st.chip_cfg.sensors = 0;
         return -1;
     }
@@ -1840,7 +1797,7 @@ int mpu_set_sensors(unsigned char sensors)
         data |= BIT_STBY_ZG;
     if (!(sensors & INV_XYZ_ACCEL))
         data |= BIT_STBY_XYZA;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_2, 1, &data)) {
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_2, 1, &data)) {
         st.chip_cfg.sensors = 0;
         return -1;
     }
@@ -1852,12 +1809,11 @@ int mpu_set_sensors(unsigned char sensors)
 
     st.chip_cfg.sensors = sensors;
     st.chip_cfg.lp_accel_mode = 0;
-    AnBT_DMP_Delay_ms(50);
+    mpu6050_dmp_delay_ms(50);
     return 0;
 }
-//
-int mpu_set_dmp_state(unsigned char enable)
-{
+
+int mpu_set_dmp_state(unsigned char enable) {
     unsigned char tmp;
     if (st.chip_cfg.dmp_on == enable)
         return 0;
@@ -1873,7 +1829,7 @@ int mpu_set_dmp_state(unsigned char enable)
         mpu_set_sample_rate(st.chip_cfg.dmp_sample_rate);
         /* Remove FIFO elements. */
         tmp = 0;
-        AnBT_DMP_I2C_Write(st.hw->addr, 0x23, 1, &tmp);
+        mpu6050_dmp_iic_write(st.hw->addr, 0x23, 1, &tmp);
         st.chip_cfg.dmp_on = 1;
         /* Enable DMP interrupt. */
         set_int_enable(1);
@@ -1883,15 +1839,14 @@ int mpu_set_dmp_state(unsigned char enable)
         set_int_enable(0);
         /* Restore FIFO settings. */
         tmp = st.chip_cfg.fifo_enable;
-        AnBT_DMP_I2C_Write(st.hw->addr, 0x23, 1, &tmp);
+        mpu6050_dmp_iic_write(st.hw->addr, 0x23, 1, &tmp);
         st.chip_cfg.dmp_on = 0;
         mpu_reset_fifo();
     }
     return 0;
 }
-//
-int mpu_get_gyro_fsr(unsigned short *fsr)
-{
+
+int mpu_get_gyro_fsr(unsigned short *fsr) {
     switch (st.chip_cfg.gyro_fsr) {
     case INV_FSR_250DPS:
         fsr[0] = 250;
@@ -1911,8 +1866,8 @@ int mpu_get_gyro_fsr(unsigned short *fsr)
     }
     return 0;
 }
-int mpu_get_accel_fsr(unsigned char *fsr)
-{
+
+int mpu_get_accel_fsr(unsigned char *fsr) {
     switch (st.chip_cfg.accel_fsr) {
     case INV_FSR_2G:
         fsr[0] = 2;
@@ -1933,8 +1888,8 @@ int mpu_get_accel_fsr(unsigned char *fsr)
         fsr[0] <<= 1;
     return 0;
 }
-int mpu_get_lpf(unsigned short *lpf)
-{
+
+int mpu_get_lpf(unsigned short *lpf) {
     switch (st.chip_cfg.lpf) {
     case INV_FILTER_188HZ:
         lpf[0] = 188;
@@ -1962,81 +1917,81 @@ int mpu_get_lpf(unsigned short *lpf)
     }
     return 0;
 }
-int mpu_get_sample_rate(unsigned short *rate)
-{
+
+int mpu_get_sample_rate(unsigned short *rate) {
     if (st.chip_cfg.dmp_on)
         return -1;
     else
         rate[0] = st.chip_cfg.sample_rate;
     return 0;
 }
-int mpu_get_fifo_config(unsigned char *sensors)
-{
+
+int mpu_get_fifo_config(unsigned char *sensors) {
     sensors[0] = st.chip_cfg.fifo_enable;
     return 0;
 }
-static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
-{
+
+static int get_st_biases(long *gyro, long *accel, unsigned char hw_test) {
     unsigned char data[MAX_PACKET_LENGTH];
     unsigned char packet_count, ii;
     unsigned short fifo_count;
 
     data[0] = 0x01;
     data[1] = 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 2, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 2, data))
         return -1;
-    AnBT_DMP_Delay_ms(200);
+    mpu6050_dmp_delay_ms(200);
     data[0] = 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->int_enable, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->int_enable, 1, data))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->fifo_en, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->i2c_mst, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->i2c_mst, 1, data))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, data))
         return -1;
     data[0] = BIT_FIFO_RST | BIT_DMP_RST;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, data))
         return -1;
-    AnBT_DMP_Delay_ms(15);
+    mpu6050_dmp_delay_ms(15);
     data[0] = st.test->reg_lpf;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->lpf, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->lpf, 1, data))
         return -1;
     data[0] = st.test->reg_rate_div;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->rate_div, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->rate_div, 1, data))
         return -1;
     if (hw_test)
         data[0] = st.test->reg_gyro_fsr | 0xE0;
     else
         data[0] = st.test->reg_gyro_fsr;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->gyro_cfg, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->gyro_cfg, 1, data))
         return -1;
 
     if (hw_test)
         data[0] = st.test->reg_accel_fsr | 0xE0;
     else
         data[0] = test.reg_accel_fsr;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->accel_cfg, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->accel_cfg, 1, data))
         return -1;
     if (hw_test)
-        AnBT_DMP_Delay_ms(200);
+        mpu6050_dmp_delay_ms(200);
 
     /* Fill FIFO for test.wait_ms milliseconds. */
     data[0] = BIT_FIFO_EN;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->user_ctrl, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->user_ctrl, 1, data))
         return -1;
 
     data[0] = INV_XYZ_GYRO | INV_XYZ_ACCEL;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->fifo_en, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
-    AnBT_DMP_Delay_ms(test.wait_ms);
+    mpu6050_dmp_delay_ms(test.wait_ms);
     data[0] = 0;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->fifo_en, 1, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
 
-    if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->fifo_count_h, 2, data))
+    if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->fifo_count_h, 2, data))
         return -1;
 
     fifo_count = (data[0] << 8) | data[1];
@@ -2046,7 +2001,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
 
     for (ii = 0; ii < packet_count; ii++) {
         short accel_cur[3], gyro_cur[3];
-        if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->fifo_r_w, MAX_PACKET_LENGTH, data))
+        if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->fifo_r_w, MAX_PACKET_LENGTH, data))
             return -1;
         accel_cur[0] = ((short)data[0] << 8) | data[1];
         accel_cur[1] = ((short)data[2] << 8) | data[3];
@@ -2079,11 +2034,10 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
 
     return 0;
 }
-static int get_accel_prod_shift(float *st_shift)
-{
+static int get_accel_prod_shift(float *st_shift) {
     unsigned char tmp[4], shift_code[3], ii;
 
-    if (AnBT_DMP_I2C_Read(st.hw->addr, 0x0D, 4, tmp))
+    if (mpu6050_dmp_iic_read(st.hw->addr, 0x0D, 4, tmp))
         return 0x07;
 
     shift_code[0] = ((tmp[0] & 0xE0) >> 3) | ((tmp[3] & 0x30) >> 4);
@@ -2103,8 +2057,7 @@ static int get_accel_prod_shift(float *st_shift)
     }
     return 0;
 }
-int mpu_get_gyro_sens(float *sens)
-{
+int mpu_get_gyro_sens(float *sens) {
     switch (st.chip_cfg.gyro_fsr) {
     case INV_FSR_250DPS:
         sens[0] = 131.f;
@@ -2123,8 +2076,7 @@ int mpu_get_gyro_sens(float *sens)
     }
     return 0;
 }
-int mpu_get_accel_sens(unsigned short *sens)
-{
+int mpu_get_accel_sens(unsigned short *sens) {
     switch (st.chip_cfg.accel_fsr) {
     case INV_FSR_2G:
         sens[0] = 16384;
@@ -2145,9 +2097,8 @@ int mpu_get_accel_sens(unsigned short *sens)
         sens[0] >>= 1;
     return 0;
 }
-//
-static int accel_self_test(long *bias_regular, long *bias_st)
-{
+
+static int accel_self_test(long *bias_regular, long *bias_st) {
     int jj, result = 0;
     float st_shift[3], st_shift_cust, st_shift_var;
 
@@ -2165,13 +2116,12 @@ static int accel_self_test(long *bias_regular, long *bias_st)
 
     return result;
 }
-static int gyro_self_test(long *bias_regular, long *bias_st)
-{
+static int gyro_self_test(long *bias_regular, long *bias_st) {
     int jj, result = 0;
     unsigned char tmp[3];
     float st_shift, st_shift_cust, st_shift_var;
 
-    if (AnBT_DMP_I2C_Read(st.hw->addr, 0x0D, 3, tmp))
+    if (mpu6050_dmp_iic_read(st.hw->addr, 0x0D, 3, tmp))
         return 0x07;
 
     tmp[0] &= 0x1F;
@@ -2193,8 +2143,7 @@ static int gyro_self_test(long *bias_regular, long *bias_st)
     }
     return result;
 }
-int mpu_run_self_test(long *gyro, long *accel)
-{
+int mpu_run_self_test(long *gyro, long *accel) {
     const unsigned char tries = 2;
     long gyro_st[3], accel_st[3];
     unsigned char accel_result, gyro_result;
@@ -2267,8 +2216,7 @@ restore:
         
     return result;
 }
-static void run_self_test(void)
-{
+static void run_self_test(void) {
     int result;
 //  char test_packet[4] = {0};
     long gyro[3], accel[3];
@@ -2295,8 +2243,7 @@ static void run_self_test(void)
     }
 }
 //
-int mpu_write_mem(unsigned short mem_addr, unsigned short length, unsigned char *data)
-{
+int mpu_write_mem(unsigned short mem_addr, unsigned short length, unsigned char *data) {
     unsigned char tmp[2];
 
     if (!data)
@@ -2311,14 +2258,13 @@ int mpu_write_mem(unsigned short mem_addr, unsigned short length, unsigned char 
     if (tmp[1] + length > st.hw->bank_size)
         return -1;
 
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->bank_sel, 2, tmp))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->bank_sel, 2, tmp))
         return -1;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->mem_r_w, length, data))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->mem_r_w, length, data))
         return -1;
     return 0;
 }
-int mpu_read_mem(unsigned short mem_addr, unsigned short length,  unsigned char *data)
-{
+int mpu_read_mem(unsigned short mem_addr, unsigned short length,  unsigned char *data) {
     unsigned char tmp[2];
 
     if (!data)
@@ -2333,14 +2279,13 @@ int mpu_read_mem(unsigned short mem_addr, unsigned short length,  unsigned char 
     if (tmp[1] + length > st.hw->bank_size)
         return -1;
 
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->bank_sel, 2, tmp))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->bank_sel, 2, tmp))
         return -1;
-    if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->mem_r_w, length, data))
+    if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->mem_r_w, length, data))
         return -1;
     return 0;
 }
-int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned char *more)
-{
+int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned char *more) {
     unsigned char tmp[2];
     unsigned short fifo_count;
     if (!st.chip_cfg.dmp_on)
@@ -2348,7 +2293,7 @@ int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned ch
     if (!st.chip_cfg.sensors)
         return -1;
 
-    if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->fifo_count_h, 2, tmp))
+    if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->fifo_count_h, 2, tmp))
         return -1;
     fifo_count = (tmp[0] << 8) | tmp[1];
     if (fifo_count < length) {
@@ -2357,7 +2302,7 @@ int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned ch
     }
     if (fifo_count > (st.hw->max_fifo >> 1)) {
         /* FIFO is 50% full, better check overflow bit. */
-        if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->int_status, 1, tmp))
+        if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->int_status, 1, tmp))
             return -1;
         if (tmp[0] & BIT_FIFO_OVERFLOW) {
             mpu_reset_fifo();
@@ -2365,13 +2310,12 @@ int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned ch
         }
     }
 
-    if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->fifo_r_w, length, data))
+    if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->fifo_r_w, length, data))
         return -1;
     more[0] = fifo_count / length - 1;
     return 0;
 }
-int mpu_load_firmware(unsigned short length, const unsigned char *firmware,unsigned short start_addr, unsigned short sample_rate)
-{
+int mpu_load_firmware(unsigned short length, const unsigned char *firmware,unsigned short start_addr, unsigned short sample_rate) {
     unsigned short ii;
     unsigned short this_write;
     /* Must divide evenly into st.hw->bank_size to avoid bank crossings. */
@@ -2397,7 +2341,7 @@ int mpu_load_firmware(unsigned short length, const unsigned char *firmware,unsig
     /* Set program start address. */
     tmp[0] = start_addr >> 8;
     tmp[1] = start_addr & 0xFF;
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->prgm_start_h, 2, tmp))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->prgm_start_h, 2, tmp))
         return -1;
 
     st.chip_cfg.dmp_loaded = 1;
@@ -2405,8 +2349,7 @@ int mpu_load_firmware(unsigned short length, const unsigned char *firmware,unsig
     return 0;
 }
 
-static  unsigned short inv_row_2_scale(const signed char *row)
-{
+static  unsigned short inv_row_2_scale(const signed char *row) {
     unsigned short b;
 	//
     if (row[0] > 0)    b = 0;
@@ -2419,8 +2362,7 @@ static  unsigned short inv_row_2_scale(const signed char *row)
     return b;
 }
 
-static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx)
-{
+static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx) {
     unsigned short scalar;
 
     /*
@@ -2438,12 +2380,11 @@ static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx)
     return scalar;
 }
 
-//
-uint8_t AnBT_DMP_MPU6050_DEV_CFG(void)		
-{
+
+uint8_t AnBT_DMP_MPU6050_DEV_CFG(void) {
 	  unsigned char anbt_dmp_data[6], anbt_dmp_rev;
 		//检验ＷＨＯ　ＡＭ　Ｉ
-		if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->who_am_i, 1, &(anbt_dmp_data[0])))
+		if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->who_am_i, 1, &(anbt_dmp_data[0])))
 			return 1;   
 	  if (anbt_dmp_data[0]!=PRODUCT_WHOAMI) 
 		{
@@ -2453,15 +2394,15 @@ uint8_t AnBT_DMP_MPU6050_DEV_CFG(void)
     }
 		//
     anbt_dmp_data[0] = 0x80;	//etootle: BIT_RESET, Reset device			重设器件
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 1, &(anbt_dmp_data[0])))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, &(anbt_dmp_data[0])))
 			return 3;   
-    AnBT_DMP_Delay_ms(100);
+    mpu6050_dmp_delay_ms(100);
 		//
     anbt_dmp_data[0] = 0x00; //etootle: Wake up chip			唤醒
-    if (AnBT_DMP_I2C_Write(st.hw->addr, st.reg->pwr_mgmt_1, 1, &(anbt_dmp_data[0])))
+    if (mpu6050_dmp_iic_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, &(anbt_dmp_data[0])))
 			return 4;
     //
-    if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->accel_offs, 6, anbt_dmp_data))
+    if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->accel_offs, 6, anbt_dmp_data))
 			return 5;	//etootle:Check product revision  		检查产品修正
 		
     anbt_dmp_rev = ((anbt_dmp_data[5] & 0x01) << 2) | ((anbt_dmp_data[3] & 0x01) << 1) | (anbt_dmp_data[1] & 0x01);
@@ -2477,7 +2418,7 @@ uint8_t AnBT_DMP_MPU6050_DEV_CFG(void)
     } 
 		else 
 		{
-			if (AnBT_DMP_I2C_Read(st.hw->addr, st.reg->prod_id, 1, &(anbt_dmp_data[0]))) return 7;      
+			if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->prod_id, 1, &(anbt_dmp_data[0]))) return 7;      
       anbt_dmp_rev = anbt_dmp_data[0] & 0x0F;
       if (!anbt_dmp_rev) 
 			{
@@ -2577,4 +2518,71 @@ void AnBT_DMP_MPU6050_SEND_DATA_FUN(void)	//dmp读取函数
 //				Yaw = 	atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;		//感觉没有价值，注掉
 //				printf("pitch: %.2f    roll:%.2f		yaw:%.2f\r\n",Pitch,Roll,Yaw);		//普通串口输出
 //			}
+
+
+void mpu6050_dmp_init(struct _mpu6050dmp_obj *mpu) {
+	iic_init();
+
+	AnBT_DMP_MPU6050_DEV_CFG();	
+	if(!mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL)) {}
+	if(!mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL)) {}
+	if(!mpu_set_sample_rate(DEFAULT_MPU_HZ)){}
+	if(!dmp_load_motion_driver_firmware()){}
+	if(!dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation))){}
+	if(!dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
+	DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
+	DMP_FEATURE_GYRO_CAL))	{}
+	if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ)) {}
+	run_self_test();
+	if(!mpu_set_dmp_state(1)){}
+}
+
+#define q30  1073741824.0f
+static float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
+
+static int mpu6050_dmp_get_pry(struct _mpu6050dmp_obj *mpu) {
+	unsigned long sensor_timestamp;
+	short gyro[3], accel[3], sensors;
+	unsigned char more;
+	long quat[4];
+
+	dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more);	
+
+	if (sensors & INV_WXYZ_QUAT ) {
+		q0=quat[0] / q30;
+		q1=quat[1] / q30;
+		q2=quat[2] / q30;
+		q3=quat[3] / q30;
+		mpu->pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3; // pitch
+		mpu->roll = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)* 57.3; // roll
+		mpu->yaw = 	atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;		//感觉没有价值，注掉
+		return -1;
+	}
+	return 0;
+}
+
+static void mpu6050_dmp_power_off(struct _mpu6050dmp_obj *mpu) {
+	iic_write_byte(0xd0,0x3f,MPU6050_RA_PWR_MGMT_2);
+	iic_write_byte(0xd0,0x40,MPU6050_RA_PWR_MGMT_1);
+
+	gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, GPIO_PIN_6); /* connect PB7 to I2C0_SDA */
+	gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, GPIO_PIN_7);
+
+	GPIO_BOP(GPIOB) = GPIO_PIN_6;
+	GPIO_BOP(GPIOB) = GPIO_PIN_7;
+
+	gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, GPIO_PIN_15);
+}
+
+
+void mpu6050_dmp_register(void) {
+//	struct _mpu6050dmp_obj *mpu6050 = GET_DAV(struct _mpu6050dmp_obj);
+
+//	mpu6050->init      = &mpu6050_dmp_init;
+//	mpu6050->get_pry   = &mpu6050_dmp_get_pry;
+//	mpu6050->power_off = &mpu6050_dmp_power_off();
+
+//	register_dev_obj("mpu",mpu6050);
+}
+
 

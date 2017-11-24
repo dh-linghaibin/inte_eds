@@ -37,6 +37,7 @@ static void nvic_configuration(void)
 {
     nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
     nvic_irq_enable(TIMER1_IRQn, 1, 1);
+	nvic_irq_enable(TIMER2_IRQn, 1, 2);
 }
 
 /**
@@ -94,6 +95,47 @@ static void timer_configuration(void)
     timer_enable(TIMER1);
 }
 
+/**
+    \brief      configure the TIMER peripheral
+    \param[in]  none
+    \param[out] none
+    \retval     none
+  */
+void timer_config(void) {
+    /* -----------------------------------------------------------------------
+    TIMER0 configuration:
+    generate 3 complementary PWM signal.
+    TIMER0CLK is fixed to systemcoreclock, the TIMER0 prescaler is equal to 108 
+    so the TIMER0 counter clock used is 1MHz.
+    insert a dead time equal to (64 + 36) * 2 / systemcoreclock =1.85us 
+    configure the break feature, active at low level, and using the automatic
+    output enable feature.
+    use the locking parameters level 0.
+    ----------------------------------------------------------------------- */
+    timer_oc_parameter_struct timer_ocintpara;
+    timer_parameter_struct timer_initpara;
+    timer_break_parameter_struct timer_breakpara;
+
+    rcu_periph_clock_enable(RCU_TIMER2);
+
+    timer_deinit(TIMER2);
+
+    /* TIMER0 configuration */
+    timer_initpara.prescaler         = 107;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 599;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER2,&timer_initpara);
+
+    /* TIMER0 channel control update interrupt enable */
+    timer_interrupt_enable(TIMER2,TIMER_INT_CMT);
+
+    /* TIMER0 counter enable */
+    timer_enable(TIMER2);
+}
+
 static void signal_init(struct _signal_obj *signal) {
 	gpio_configuration(); 
 	nvic_configuration();
@@ -148,7 +190,7 @@ void TIMER1_IRQHandler(void) {
 
             if(readvalue2 > readvalue1){
                 count = (readvalue2 - readvalue1); 
-            }else{
+            } else {
                 count = ((0xFFFF - readvalue1) + readvalue2); 
             }
             fre = (float)1000000 / count;
@@ -161,3 +203,16 @@ void TIMER1_IRQHandler(void) {
         timer_interrupt_flag_clear(TIMER1,TIMER_INT_CH3);
     }
 }
+/*!
+    \brief      this function handles TIMER0 interrupt request
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void TIMER2_IRQHandler(void) {
+    /* clear TIMER interrupt flag */
+    timer_interrupt_flag_clear(TIMER2,TIMER_INT_CMT);
+}
+
+
+

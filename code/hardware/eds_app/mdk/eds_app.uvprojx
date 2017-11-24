@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>GD32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\frame\include;..\device\include;..\gd32\include</IncludePath>
+              <IncludePath>..\frame\include;..\device\include;..\gd32\include;..\app\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -384,6 +384,16 @@
               <FileType>1</FileType>
               <FilePath>..\app\app.c</FilePath>
             </File>
+            <File>
+              <FileName>device.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\device.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_motion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\task_motion.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -423,6 +433,11 @@
               <FileName>l_os.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\frame\l_os.c</FilePath>
+            </File>
+            <File>
+              <FileName>fsm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\frame\include\fsm.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -8,7 +8,7 @@
 #include "Button.h"
 
 
-static void (*but_callback)(enum BUTTON_TYPE type); 
+void (*but_callback)(enum BUTTON_TYPE type); 
 
 /*!
     \brief      configure the different system clocks
@@ -49,10 +49,10 @@ static void exti_config(void) {
     \param[out] none
     \retval     none
 */
-static void button_init(struct _button_obj button) {
+static void button_init(struct _button_obj *button) {
 	rcu_config();
 	gpio_config();
-	exti_config();
+	//exti_config();
 }
 /*!
     \brief      configure the DMA peripheral
@@ -60,7 +60,21 @@ static void button_init(struct _button_obj button) {
     \param[out] none
     \retval     none
 */
-static int button_power_off(struct _button_obj button) {
+int button_get(struct _button_obj *button,enum BUTTON_TYPE type) {
+	if(type == ADD) {
+		return gpio_input_bit_get(GPIOB,GPIO_PIN_12);
+	} else {
+		return gpio_input_bit_get(GPIOB,GPIO_PIN_13);
+	}
+}
+/*!
+    \brief      configure the DMA peripheral
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+static int button_power_off(struct _button_obj *button) {
+	exti_config();
 	return D_OK;
 }
 /*!
@@ -69,7 +83,7 @@ static int button_power_off(struct _button_obj button) {
     \param[out] none
     \retval     none
 */
-static int button_power_on(struct _button_obj button) {
+static int button_power_on(struct _button_obj *button) {
 	return D_OK;
 }
 
@@ -89,6 +103,7 @@ void button_register(void) {
 	button->callback  = &button_callback;
 	button->power_off = &button_power_off;
 	button->power_on  = &button_power_on;
+	button->get       = &button_get;
 
     register_dev_obj("but",button);
 }

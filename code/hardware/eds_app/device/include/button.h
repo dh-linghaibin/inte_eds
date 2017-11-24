@@ -20,11 +20,14 @@ enum BUTTON_TYPE{
 };
 
 typedef struct _button_obj {
-	void (*init)(struct _button_obj button);
-	int  (*power_off)(struct _button_obj button);
-	int  (*power_on)(struct _button_obj button);
+	void (*init)(struct _button_obj *button);
+	int (*get)(struct _button_obj *button,enum BUTTON_TYPE type);
+	int  (*power_off)(struct _button_obj *button);
+	int  (*power_on)(struct _button_obj *button);
 	void (*callback)(void(*f)(enum BUTTON_TYPE type));
 }button_obj;
+
+void button_register(void);
 
 #ifdef __cplusplus
 }

@@ -104,7 +104,7 @@ bool i2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t len, uint8_t * data) {
 	 /* send a stop condition to I2C bus */
     i2c_stop_on_bus(I2C0);
     while(I2C_CTL0(I2C0)&0x0200);
-    return 1;
+    return TRUE;
 }
 
 bool i2cRead(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf) {

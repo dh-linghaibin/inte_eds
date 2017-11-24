@@ -298,11 +298,11 @@ static void taskInit(struct task *task)
 }
 
 ////////////////////////////////////////////////////////////////////////
-void SysTick_Handler(void) {
-	if(run_flag == 1) {
-		ticks ++;
-		updateNextTask();
-		swTask();
-	}
-}
+//void SysTick_Handler(void) {
+//	if(run_flag == 1) {
+//		ticks ++;
+//		updateNextTask();
+//		swTask();
+//	}
+//}
 

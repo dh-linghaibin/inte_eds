@@ -17,6 +17,7 @@ extern "C" {
 typedef struct _power_obj {
 	void     (*init)(struct _power_obj * power);
 	uint16_t (*get_battery)(struct _power_obj * power);
+	uint16_t (*get_moto_current)(struct _power_obj * power);
 	int      (*power_off)(struct _power_obj *power);
 	int      (*power_on)(struct _power_obj *power);
 } power_obj;

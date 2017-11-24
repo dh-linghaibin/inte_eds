@@ -14,21 +14,26 @@ extern "C" {
 
 #include "l_config.h"
 
-typedef struct _servo_cb_obj {
-	void (*left_limit_cb)(void(*f)(void));  /* 左限位回调 */
-	void (*right_limit_cb)(void(*f)(void)); /* 右限位回调 */
-	void (*calibration_cb)(void(*f)(void)); /* 校准回调 */
-	void (*position_cb)(void(*f)(void));	 /* 光栅回调 */
-}servo_cb_obj;
+typedef enum {
+	RIGHT,
+	LEFT
+}limit_e;
 
 typedef struct _servo_obj {
 	int position; /* 伺服位置 */
 
-	void (*init)(struct _servo_obj *servo);
-	void (*servo_position)(struct _servo_obj *servo,uint16_t pos);
+	void (*init)(struct _servo_obj *servo); /* 初始化 */
+	void (*servo_position)(struct _servo_obj *servo,uint16_t pos); /* 设置位置 */
+	void (*speed_set)(struct _servo_obj *servo,int speed);			/* 设置速度 */
+	int (*get_limit)(struct _servo_obj *servo,limit_e dr);
+
+	void (*left_limit_cb)(void(*f)(void));  /* 左限位回调 */
+	void (*right_limit_cb)(void(*f)(void)); /* 右限位回调 */
+	void (*calibration_cb)(void(*f)(void)); /* 校准回调 */
+	void (*position_cb)(void(*f)(void));	/* 光栅回调 */
+
 	int  (*power_off)(struct _servo_obj *m);
 	int  (*power_on)(struct _servo_obj *m);
-	servo_cb_obj *even_cb;
 }servo_obj;
 
 void servo_register(void);

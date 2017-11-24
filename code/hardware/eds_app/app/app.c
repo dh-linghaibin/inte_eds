@@ -12,11 +12,14 @@
 #include "mpu6050.h"
 #include "signal.h"
 #include "power.h"
+#include "Button.h"
 #include "rtc.h"
 #include "l_math.h"
 #include "iwdg.h"
 #include "s_delay.h"
-#include "l_os.h"
+#include "fsm.h"
+
+#include "device.h"
 
 /*设置中断向量*/
 void app_set(void) {
@@ -36,148 +39,222 @@ void systick_config(void) {
     NVIC_SetPriority(SysTick_IRQn, 0x00U);
 }
 
+static uint8_t run_1ms_flag = 0;
+void SysTick_Handler(void) {
+	run_1ms_flag++;
+}
 
-unsigned int spPA5[128];
-unsigned int spPA6[128];
-unsigned int spPA7[128];
-struct task taskPA5,taskPA6,taskPA7;
+/*
+ * task for led
+ */
+simple_fsm(LedTask,
+	led_obj   *led;	
+	power_obj *power; )
+fsm_init_name(LedTask)
+	me.led = get_device("led");	
+	if(me.led == NULL) {
+		fsm_task_off(LedTask); /* get led faild out the task */
+		return 0;
+	}
+	me.power = get_device("pow");
+	if(me.power == NULL) {
+		fsm_task_off(LedTask); /* get power faild out the task */
+		return 0;
+	}
+	while(1) {
+		WaitX(250);  
+		me.led->set(me.led,TOGGLE,R);
+//		WaitX(250);  
+//		printf("bettery: %d V \r\n",me.power->get_moto_current(me.power));
+	}
+fsm_end
 
-void PA5On(void)
-{
-	while(1)
-	{
-		led_obj *led = get_device("led");	
-		if(led != NULL) {
-			led->set(led,TOGGLE,R);
-		}
-		sleep(200);
-		if(led != NULL) {
-			led->set(led,TOGGLE,R);
-		}
-		sleep(200);
+
+
+int posstion_num = 0;
+uint8_t moto_dr = 0;
+void position_cb(void) {
+	if(moto_dr == 0) {
+		posstion_num++;
+	} else {
+		posstion_num--;
 	}
 }
 
-void PA6On(void)
-{
-	while(1)
-	{
-		led_obj *led = get_device("led");	
-		if(led != NULL) {
-			led->set(led,TOGGLE,SIGNAL);
-		}
-		sleep(150);
-		if(led != NULL) {
-			led->set(led,TOGGLE,SIGNAL);
-		}
-		sleep(150);
+void calibration_cb(void) {
+	posstion_num = 300;
+}
+
+void right_limit_cb(void) {
+	servo_obj  *servo = get_device("ser");
+	if(servo == NULL) {
+		servo->speed_set(servo,0);
 	}
 }
 
-void PA7On(void)
-{
-	while(1)
-	{
-		led_obj *led = get_device("led");	
-		if(led != NULL) {
-			led->set(led,TOGGLE,B);
-		}
-		sleep(250);
-		if(led != NULL) {
-			led->set(led,TOGGLE,B);
-		}
-		sleep(250);
+void left_limit_cb(void) {
+	servo_obj  *servo = get_device("ser");
+	if(servo == NULL) {
+		servo->speed_set(servo,0);
 	}
 }
 
-static void device_init(void) {
-	bluetooth_register();
-	led_register();
-	servo_register();
-	signal_register();
-	power_register();
-	mpu6050_register();
-	rtc_register();
-	iwdg_register();
 
-	bluetooth_obj *ble = get_device("ble");
-	if(ble != NULL) {
-		ble->init(ble);
-		ble->power_off(ble);
-	}
+static const uint16_t stall[11] = {2000,2500,3000,3500,4000,4500,5000,5500,6000,6600,7000};
 
-	led_obj *led = get_device("led");	
-	if(led != NULL) {
-		led->init(led);
-		//led->set(led,TOGGLE,R);
-	}
-
-	servo_obj *servo = get_device("ser");
-	if(servo != NULL) {
-		servo->init(servo);
-		servo->power_off(servo);
-	}
-
-	signal_obj *signal = get_device("sig");
-	if(signal != NULL) {
-		signal->init(signal);
-		signal->power_off(signal);
-	}
-	
-	power_obj *power = get_device("pow");
-	if(power != NULL) {
-		power->init(power);
-		power->power_off(power);
-	}
-
-	rtc_obj *rtc = get_device("rtc");
-	if(rtc != NULL) {
-		//rtc->init(rtc);
-	}
-
-	iwdg_obj *iwdg = get_device("iwdg");
-	if(iwdg != NULL) {
-		//iwdg->init(iwdg);
-	}
-
-	mpu6050_obj *mpu6050 = get_device("mpu");
-	if(mpu6050 != NULL) {
-		mpu6050->init(mpu6050);
-//		mpu6050->power_off(mpu6050);
+void to_pos(servo_obj  *servo,uint8_t stal) {
+	if(stall[stal] > posstion_num) {
+		moto_dr = 0;
+		servo->speed_set(servo,1000);
+		while(posstion_num < 600) {
+			uint16_t last = 600 - posstion_num;
+			if(last > 100) {
+				servo->speed_set(servo,800);
+			} else if(last > 80) {
+				servo->speed_set(servo,700);
+			} else if(last > 60) {
+				servo->speed_set(servo,500);
+			} else if(last > 40) {
+				servo->speed_set(servo,400);
+			} else if(last > 20) {
+				servo->speed_set(servo,300);
+			}
+		}
+		servo->speed_set(servo,0);
+	} else {
+		
 	}
 }
 
-uint8_t  bbb_data[20] = {0x55,0x12,};
-uint8_t  bbb_data2[20] = {0x15,0x02,};
-uint32_t g_block_address;
+uint16_t last;
+
+simple_fsm(moto,
+	uint8_t    but_sub_count;
+	uint8_t    but_add_count;
+	servo_obj  *servo;
+	button_obj *button; 
+	power_obj *power; 		)
+fsm_init_name(moto)
+	me.servo = get_device("ser");
+	if(me.servo == NULL) {
+		fsm_task_off(moto); /* get servo faild out the task */
+		return 0;
+	}
+	me.button = get_device("but");	
+	if(me.button == NULL) {
+		fsm_task_off(moto); /* get button faild out the task */
+		return 0;
+	}
+	me.power = get_device("pow");
+	if(me.power == NULL) {
+		fsm_task_off(LedTask); /* get power faild out the task */
+		return 0;
+	}
+	me.servo->position_cb(position_cb);
+	me.servo->calibration_cb(calibration_cb);
+	me.servo->right_limit_cb(right_limit_cb);
+	me.servo->left_limit_cb(left_limit_cb);
+	while(1) {
+		WaitX(1000);
+		moto_dr = 0;
+		me.servo->speed_set(me.servo,1000);
+		uint8_t breaks = 0;
+		while(posstion_num < (600-breaks)) {
+			WaitX(0);
+			last = me.power->get_moto_current(me.power);
+			if(last > 280) {
+				breaks = 5;
+			} else if(last > 250) {
+				breaks = 10;
+			} else if(last > 210) {
+				breaks = 20;
+			} else if(last > 180) {
+				breaks = 30;
+			} else {
+				breaks = 35;
+			}
+		}
+		me.servo->speed_set(me.servo,0);
+		
+		WaitX(1000);
+		moto_dr = 1;
+		me.servo->speed_set(me.servo,-1000);
+		while(posstion_num > 35) {
+			WaitX(0);
+		}
+		me.servo->speed_set(me.servo,0);
+		
+//		WaitX(2);
+//		if(me.button->get(me.button,SUB) == 0) {
+//			moto_dr = 0;
+//			me.servo->speed_set(me.servo,1000);
+//		} else if(me.button->get(me.button,ADD) == 0) {
+//			moto_dr = 1;
+//			me.servo->speed_set(me.servo,-1000);
+//		} else {
+//			me.servo->speed_set(me.servo,0);
+//		}
+
+//		if(me.button->get(me.button,SUB) == 0) {
+//			if(me.but_sub_count == 30) {
+//				me.but_sub_count++;
+//				moto_dr = 0;
+//				me.servo->speed_set(me.servo,1000);
+//				while(posstion_num < 590) {
+//					WaitX(0);
+//					me.power->get_moto_current(me.power);
+//					uint16_t last = 600 - posstion_num;
+//					if(last > 100) {
+//						me.servo->speed_set(me.servo,800);
+//					} else if(last > 80) {
+//						me.servo->speed_set(me.servo,700);
+//					} else if(last > 60) {
+//						me.servo->speed_set(me.servo,500);
+//					} else if(last > 40) {
+//						me.servo->speed_set(me.servo,400);
+//					} else if(last > 20) {
+//						me.servo->speed_set(me.servo,300);
+//					}
+//				}
+//				me.servo->speed_set(me.servo,0);
+//			} else {
+//				me.but_sub_count++;
+//			}
+//		} else {
+//			me.but_sub_count = 0;
+//		}
+
+//		if(me.button->get(me.button,ADD) == 0) {
+//			if(me.but_add_count == 30) {
+//				me.but_add_count++;
+//				moto_dr = 1;
+//				me.servo->speed_set(me.servo,-1000);
+//				while(posstion_num > 20) {
+//					WaitX(0);
+//				}
+//				me.servo->speed_set(me.servo,0);
+//			} else {
+//				me.but_add_count++;
+//			}
+//		} else {
+//			me.but_add_count = 0;
+//		}
+	}
+fsm_end
 
 int main() {
 	//app_set();
 	systick_config();
-	/* clock enable */
-	rcu_periph_clock_enable(RCU_PMU);
-//	pmu_wakeup_pin_enable();
-
 	device_init();
-	
-	fmc_unlock();
-	flash_write_multi_blocks(bbb_data, g_block_address, 0, 2);
-	flash_read_multi_blocks(bbb_data2, g_block_address, 2, 1);
-	 
-	//AnBT_DMP_MPU6050_Init();//6050DMP初始化
 
-	sdelay_ms(2000);
-	//pmu_to_deepsleepmode(PMU_LDO_NORMAL,WFI_CMD);
-	//pmu_to_standbymode(WFI_CMD);
-	//SystemInit();
-	//led_register();
-	//while(1);
-//	iwdg_obj *iwdg = get_device("iwdg");
-
-	taskCreate(&taskPA5,31,PA5On,spPA5,128,"PA5");
-	taskCreate(&taskPA6,30,PA6On,spPA6,128,"PA6");
-	taskCreate(&taskPA7,29,PA7On,spPA7,128,"PA7");
-
-	QSysStart();
+	fsm_task_on(LedTask);
+	fsm_task_on(moto);
+	while(1) {
+		if(run_1ms_flag >= 1) {
+			run_1ms_flag = 0;
+			fsm_going(LedTask);
+			fsm_going(moto);
+		}
+	}
 	return 0;
 }

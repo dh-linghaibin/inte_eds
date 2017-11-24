@@ -12,7 +12,6 @@ static void(*right_limit_cb)(void); /* 右限位回调 */
 static void(*calibration_cb)(void); /* 校准回调 */
 static void(*position_cb)(void);	 /* 光栅回调 */
 
-static const uint16_t stall[11] = {2000,2500,3000,3500,4000,4500,5000,5500,6000,6600,7000};
 /**
     \brief      configure servo_signal_init
     \param[in]  none
@@ -24,6 +23,25 @@ static void servo_signal_init(void) {
 	gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ,GPIO_PIN_12);
 	gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ,GPIO_PIN_0);
 	gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ,GPIO_PIN_1);
+
+	nvic_irq_enable(EXTI0_IRQn, 1U, 2U);
+	nvic_irq_enable(EXTI1_IRQn, 1U, 1U);
+	nvic_irq_enable(EXTI10_15_IRQn, 2U, 0U);
+	//	/* connect key EXTI line to key GPIO pin */
+	gpio_exti_source_select(GPIO_EVENT_PORT_GPIOC,GPIO_EVENT_PIN_14);
+	gpio_exti_source_select(GPIO_EVENT_PORT_GPIOA,GPIO_EVENT_PIN_12);
+	gpio_exti_source_select(GPIO_EVENT_PORT_GPIOA,GPIO_EVENT_PIN_0);
+	gpio_exti_source_select(GPIO_EVENT_PORT_GPIOA,GPIO_EVENT_PIN_1);
+	//	/* configure key EXTI line */
+	exti_init(EXTI_0, EXTI_INTERRUPT, EXTI_TRIG_RISING);
+	exti_init(EXTI_1, EXTI_INTERRUPT, EXTI_TRIG_BOTH);
+	exti_init(EXTI_12, EXTI_INTERRUPT, EXTI_TRIG_RISING);
+	exti_init(EXTI_14, EXTI_INTERRUPT, EXTI_TRIG_RISING);
+
+	exti_interrupt_flag_clear(EXTI_0);
+	exti_interrupt_flag_clear(EXTI_1);
+	exti_interrupt_flag_clear(EXTI_12);
+	exti_interrupt_flag_clear(EXTI_14);
 }
 
 /**
@@ -68,7 +86,7 @@ static void servo_pwm_init(void) {
 	timer_channel_output_mode_config(TIMER0,TIMER_CH_1,TIMER_OC_MODE_PWM0);
 	timer_channel_output_shadow_config(TIMER0,TIMER_CH_1,TIMER_OC_SHADOW_DISABLE);
 
-	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,1000);  		/* CH3 configuration in PWM mode1,duty cycle 75% */
+	timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0);  		/* CH3 configuration in PWM mode1,duty cycle 75% */
 	timer_channel_output_mode_config(TIMER0,TIMER_CH_2,TIMER_OC_MODE_PWM0);
 	timer_channel_output_shadow_config(TIMER0,TIMER_CH_2,TIMER_OC_SHADOW_DISABLE);
 
@@ -92,7 +110,7 @@ static void servo_init(struct _servo_obj *servo) {
 	GPIO_BC(GPIOA) = GPIO_PIN_6; /* 打开 */
 	
 	gpio_init(GPIOA, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ,GPIO_PIN_8);
-	GPIO_BC(GPIOA) = GPIO_PIN_8; /*设备打开*/
+	GPIO_BOP(GPIOA) = GPIO_PIN_8; /*设备打开*/
 
 	servo_signal_init(); /*限位前 pc14 限位后 pa12 校准 pa0 转速 pa1*/
 	servo_pwm_init();    /*电机sleep PA8 高打开设备 IN1 PA9 IN2 PA10  电流	PB1 模拟*/
@@ -139,10 +157,81 @@ static int servo_power_on(struct _servo_obj *m) {
 	return D_OK;
 }
 
+/**
+    \brief      servo_power_on
+    \param[in]  struct _servo_obj
+    \param[out] none
+    \retval     none
+*/
 static void servo_servo_position(struct _servo_obj *servo,uint16_t pos) {
 	
 }
-
+/**
+    \brief      servo_power_on
+    \param[in]  struct _servo_obj
+    \param[out] none
+    \retval     none
+*/
+static void servo_moto_set_speed(struct _servo_obj *servo,int speed) {
+	if(speed >= 0) {
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0); 
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,speed); 
+	} else {
+		speed = 0-speed;
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,speed); 
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0); 
+	}	
+}
+/**
+    \brief      servo_get_limit
+    \param[in]  struct _servo_obj
+    \param[out] none
+    \retval     none
+*/
+int servo_get_limit(struct _servo_obj *servo,limit_e dr) {
+	if(dr == RIGHT) {
+		return gpio_input_bit_get(GPIOA,GPIO_PIN_12);
+	} else {
+		return gpio_input_bit_get(GPIOC,GPIO_PIN_14);
+	}
+	
+}
+/**
+    \brief      servo_left_limit_cb
+    \param[in]  void(*f)(void)
+    \param[out] none
+    \retval     none
+*/
+static void servo_left_limit_cb(void(*f)(void)) {
+	left_limit_cb = f;
+}
+/**
+    \brief      servo_left_limit_cb
+    \param[in]  void(*f)(void)
+    \param[out] none
+    \retval     none
+*/
+static void servo_right_limit_cb(void(*f)(void)) {
+	right_limit_cb = f;
+}
+/**
+    \brief      servo_left_limit_cb
+    \param[in]  void(*f)(void)
+    \param[out] none
+    \retval     none
+*/
+static void servo_calibration_cb(void(*f)(void)) {
+	calibration_cb = f;
+}
+/**
+    \brief      servo_left_limit_cb
+    \param[in]  void(*f)(void)
+    \param[out] none
+    \retval     none
+*/
+static void servo_position_cb(void(*f)(void)) {
+	position_cb = f;
+}
 /**
     \brief      servo_register
     \param[in]  none
@@ -152,10 +241,16 @@ static void servo_servo_position(struct _servo_obj *servo,uint16_t pos) {
 void servo_register(void) {
 	struct _servo_obj *servo = GET_DAV(struct _servo_obj);
 	
-	servo->init      = &servo_init;
-	servo->power_off = &servo_power_off;
-	servo->power_on  = &servo_power_on;
-	
+	servo->init           = &servo_init;
+	servo->power_off      = &servo_power_off;
+	servo->power_on       = &servo_power_on;
+	servo->calibration_cb = &servo_calibration_cb;
+	servo->left_limit_cb  = &servo_left_limit_cb;
+	servo->position_cb    = &servo_position_cb;
+	servo->right_limit_cb = &servo_right_limit_cb;
+	servo->speed_set      = &servo_moto_set_speed;
+	servo->get_limit	  = &servo_get_limit;
+
     register_dev_obj("ser",servo);
 }
 
@@ -177,6 +272,10 @@ void EXTI1_IRQHandler(void) {
 	}
 }
 
+#include "Button.h"
+
+extern void (*but_callback)(enum BUTTON_TYPE type);
+
 void EXTI10_15_IRQHandler(void) {
     if (RESET != exti_interrupt_flag_get(EXTI_14)) {
         exti_interrupt_flag_clear(EXTI_14);
@@ -185,8 +284,20 @@ void EXTI10_15_IRQHandler(void) {
 		}
     } else if(RESET != exti_interrupt_flag_get(EXTI_12)) {
 		exti_interrupt_flag_clear(EXTI_12);
-		if(right_limit_cb != 0) {
-			right_limit_cb();
+		if(gpio_input_bit_get(GPIOA,GPIO_PIN_12) == SET) {
+			if(right_limit_cb != 0) {
+				right_limit_cb();
+			}
+		}
+		if(gpio_input_bit_get(GPIOB,GPIO_PIN_12) == SET) {
+			if(but_callback != 0) {
+				but_callback(ADD);
+			}
+		}
+	} else if(RESET != exti_interrupt_flag_get(EXTI_13)) {
+		exti_interrupt_flag_clear(EXTI_13);
+		if(but_callback != 0) {
+			but_callback(SUB);
 		}
 	}
 }
