@@ -10,11 +10,11 @@
 
 void mpu6050_dmp_delay_us(uint32_t dly) {
 	uint8_t i;
-	while(dly--) for(i=0;i<10;i++);
+	while(dly--) for(i=0;i<5;i++);
 }
 
 void mpu6050_dmp_delay_ms(uint32_t dly) {
-	while(dly--) mpu6050_dmp_delay_us(1000);
+	while(dly--) mpu6050_dmp_delay_us(500);
 }
 
 
@@ -2216,31 +2216,45 @@ restore:
         
     return result;
 }
+
+long GX_OFFSET,GY_OFFSET,GZ_OFFSET,AX_OFFSET,AY_OFFSET,AZ_OFFSET;
+
 static void run_self_test(void) {
-    int result;
-//  char test_packet[4] = {0};
-    long gyro[3], accel[3];
+	int result;
+	//  char test_packet[4] = {0};
+	long gyro[3], accel[3];
 	//
-    result = mpu_run_self_test(gyro, accel);
-//  if (result == 0x7) 
-		if (result == 0x3) 
-		{
-        /* Test passed. We can trust the gyro data here, so let's push it down
-         * to the DMP.
-         */
-        float sens;
-        unsigned short accel_sens;
-        mpu_get_gyro_sens(&sens);
-        gyro[0] = (long)(gyro[0] * sens);
-        gyro[1] = (long)(gyro[1] * sens);
-        gyro[2] = (long)(gyro[2] * sens);
+	result = mpu_run_self_test(gyro, accel);
+	//  if (result == 0x7) 
+	if (result == 0x3) 
+	{
+		/* Test passed. We can trust the gyro data here, so let's push it down
+		* to the DMP.
+		*/
+		float sens;
+		unsigned short accel_sens;
+//		mpu_get_gyro_sens(&sens);
+//		gyro[0] = (long)(gyro[0] * sens);
+//		gyro[1] = (long)(gyro[1] * sens);
+//		gyro[2] = (long)(gyro[2] * sens);
+//		dmp_set_gyro_bias(gyro);
+//		mpu_get_accel_sens(&accel_sens);
+//		accel[0] *= accel_sens;
+//		accel[1] *= accel_sens;
+//		accel[2] *= accel_sens;
+//		dmp_set_accel_bias(accel);
+		mpu_get_gyro_sens(&sens); 
+        gyro[0] = (long)(GX_OFFSET * sens);
+        gyro[1] = (long)(GY_OFFSET * sens);
+        gyro[2] = (long)(GZ_OFFSET * sens);
         dmp_set_gyro_bias(gyro);
+
         mpu_get_accel_sens(&accel_sens);
-        accel[0] *= accel_sens;
-        accel[1] *= accel_sens;
-        accel[2] *= accel_sens;
+        accel[0] = AX_OFFSET * accel_sens;
+        accel[1] = AY_OFFSET * accel_sens;
+        accel[2] = AZ_OFFSET * accel_sens;
         dmp_set_accel_bias(accel);
-    }
+	}
 }
 //
 int mpu_write_mem(unsigned short mem_addr, unsigned short length, unsigned char *data) {
@@ -2384,9 +2398,9 @@ static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx) 
 uint8_t AnBT_DMP_MPU6050_DEV_CFG(void) {
 	  unsigned char anbt_dmp_data[6], anbt_dmp_rev;
 		//检验ＷＨＯ　ＡＭ　Ｉ
-		if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->who_am_i, 1, &(anbt_dmp_data[0])))
+	if (mpu6050_dmp_iic_read(st.hw->addr, st.reg->who_am_i, 1, &(anbt_dmp_data[0])))
 			return 1;   
-	  if (anbt_dmp_data[0]!=PRODUCT_WHOAMI) 
+  if (anbt_dmp_data[0]!=PRODUCT_WHOAMI) 
 		{
 			//("WHO AM I error",14); 
 			//(anbt_dmp_data[0]);
@@ -2556,9 +2570,9 @@ static int mpu6050_dmp_get_pry(struct _mpu6050dmp_obj *mpu) {
 		mpu->pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3; // pitch
 		mpu->roll = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)* 57.3; // roll
 		mpu->yaw = 	atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;		//感觉没有价值，注掉
-		return -1;
+		return 0;
 	}
-	return 0;
+	return -1;
 }
 
 static void mpu6050_dmp_power_off(struct _mpu6050dmp_obj *mpu) {
@@ -2576,13 +2590,13 @@ static void mpu6050_dmp_power_off(struct _mpu6050dmp_obj *mpu) {
 
 
 void mpu6050_dmp_register(void) {
-//	struct _mpu6050dmp_obj *mpu6050 = GET_DAV(struct _mpu6050dmp_obj);
+	struct _mpu6050dmp_obj *mpu6050 = GET_DAV(struct _mpu6050dmp_obj);
 
-//	mpu6050->init      = &mpu6050_dmp_init;
-//	mpu6050->get_pry   = &mpu6050_dmp_get_pry;
-//	mpu6050->power_off = &mpu6050_dmp_power_off();
+	mpu6050->init      = &mpu6050_dmp_init;
+	mpu6050->get_pry   = &mpu6050_dmp_get_pry;
+	mpu6050->power_off = &mpu6050_dmp_power_off;
 
-//	register_dev_obj("mpu",mpu6050);
+	register_dev_obj("mpu",mpu6050);
 }
 
 

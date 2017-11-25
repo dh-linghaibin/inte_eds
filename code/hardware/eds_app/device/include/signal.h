@@ -16,6 +16,8 @@ extern "C" {
 
 typedef struct _signal_obj {
 	void (*init)(struct _signal_obj *signal);
+	uint16_t (*get_speed)(struct _signal_obj *signal);
+	uint16_t (*get_cadence)(struct _signal_obj *signal);
 	int  (*power_off)(struct _signal_obj *m);
 	int  (*power_on)(struct _signal_obj *m);
 }signal_obj;

@@ -460,11 +460,6 @@
               <FilePath>..\device\servo.c</FilePath>
             </File>
             <File>
-              <FileName>mpu6050.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\device\mpu6050.c</FilePath>
-            </File>
-            <File>
               <FileName>signal.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\device\signal.c</FilePath>

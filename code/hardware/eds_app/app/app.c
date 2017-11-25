@@ -9,8 +9,8 @@
 #include "bluetooth.h"
 #include "led.h"
 #include "servo.h"
-#include "mpu6050.h"
 #include "signal.h"
+#include "mpu6050_dmp.h"
 #include "power.h"
 #include "Button.h"
 #include "rtc.h"
@@ -48,8 +48,10 @@ void SysTick_Handler(void) {
  * task for led
  */
 simple_fsm(LedTask,
-	led_obj   *led;	
-	power_obj *power; )
+	led_obj        *led;	
+	power_obj      *power;
+	mpu6050dmp_obj *mpu6050;
+	signal_obj *signal;		)
 fsm_init_name(LedTask)
 	me.led = get_device("led");	
 	if(me.led == NULL) {
@@ -61,9 +63,21 @@ fsm_init_name(LedTask)
 		fsm_task_off(LedTask); /* get power faild out the task */
 		return 0;
 	}
+	me.mpu6050 = get_device("mpu");
+	if(me.mpu6050 == NULL) {
+		fsm_task_off(LedTask); /* get mpu6050 faild out the task */
+		return 0;
+	}
+	me.signal = get_device("sig");
+	if(me.signal == NULL) {
+		fsm_task_off(LedTask); /* get signal faild out the task */
+		return 0;
+	}
 	while(1) {
 		WaitX(250);  
 		me.led->set(me.led,TOGGLE,R);
+		me.mpu6050->get_pry(me.mpu6050);
+		printf("mpu : %f2    %f2    %f2  speed:%d  cadence:%d \r\n",me.mpu6050->yaw,me.mpu6050->pitch,me.mpu6050->roll,me.signal->get_speed(me.signal),me.signal->get_cadence(me.signal));
 //		WaitX(250);  
 //		printf("bettery: %d V \r\n",me.power->get_moto_current(me.power));
 	}
@@ -134,6 +148,7 @@ simple_fsm(moto,
 	servo_obj  *servo;
 	button_obj *button; 
 	power_obj *power; 		)
+
 fsm_init_name(moto)
 	me.servo = get_device("ser");
 	if(me.servo == NULL) {
@@ -160,9 +175,11 @@ fsm_init_name(moto)
 		me.servo->speed_set(me.servo,1000);
 		uint8_t breaks = 0;
 		while(posstion_num < (600-breaks)) {
-			WaitX(0);
+			//WaitX(0);
 			last = me.power->get_moto_current(me.power);
 			if(last > 280) {
+
+			} else if(last > 280) {
 				breaks = 5;
 			} else if(last > 250) {
 				breaks = 10;

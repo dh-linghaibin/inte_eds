@@ -7,6 +7,12 @@
 
 #include "signal.h"
 
+static uint16_t bike_speed_count = 0;
+static uint16_t bike_speed = 0;
+
+static uint16_t bike_cadence_count = 0;
+static uint16_t bike_cadence = 0;
+
 /**
     \brief      configure the GPIO ports
     \param[in]  none
@@ -121,16 +127,16 @@ void timer_config(void) {
     timer_deinit(TIMER2);
 
     /* TIMER0 configuration */
-    timer_initpara.prescaler         = 107;
+    timer_initpara.prescaler         = 375 - 1;
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 599;
+    timer_initpara.period            = 100;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
     timer_init(TIMER2,&timer_initpara);
 
     /* TIMER0 channel control update interrupt enable */
-    timer_interrupt_enable(TIMER2,TIMER_INT_CMT);
+    timer_interrupt_enable(TIMER2,TIMER_INT_UP);
 
     /* TIMER0 counter enable */
     timer_enable(TIMER2);
@@ -140,15 +146,26 @@ static void signal_init(struct _signal_obj *signal) {
 	gpio_configuration(); 
 	nvic_configuration();
 	timer_configuration();
+	timer_config();
+}
+
+uint16_t signal_get_speed(struct _signal_obj *signal) {
+	return bike_speed;
+}
+
+uint16_t signal_get_cadence(struct _signal_obj *signal) {
+	return bike_cadence;
 }
 
 static int signal_power_off(struct _signal_obj *m) {
 	GPIO_BC(GPIOB) = GPIO_PIN_14;
+	timer_disable(TIMER2);
 	return D_OK;
 }
 
 static int signal_power_on(struct _signal_obj *m) {
 	GPIO_BOP(GPIOB) = GPIO_PIN_14;
+	 timer_enable(TIMER2);
 	return D_OK;
 }
 
@@ -156,20 +173,14 @@ static int signal_power_on(struct _signal_obj *m) {
 void signal_register(void) {
 	struct _signal_obj *signal = GET_DAV(struct _signal_obj);
 
-	signal->init 	  = &signal_init;
-	signal->power_off = &signal_power_off;
-	signal->power_on  = &signal_power_on;
+	signal->init 	    = &signal_init;
+	signal->get_speed   = &signal_get_speed;
+	signal->get_cadence = &signal_get_cadence;
+	signal->power_off   = &signal_power_off;
+	signal->power_on    = &signal_power_on;
 
     register_dev_obj("sig",signal);
 }
-
-static uint32_t Rc_Pwm_In = 0;
-timer_ic_parameter_struct timer_icinitpara;
-
-__IO uint16_t readvalue1 = 0, readvalue2 = 0;
-__IO uint16_t ccnumber = 0;
-__IO uint32_t count = 0;
-__IO float fre = 0;
 
 /**
   * @brief  This function handles TIMER2 interrupt request.
@@ -178,29 +189,31 @@ __IO float fre = 0;
   */
 void TIMER1_IRQHandler(void) {
     if(SET == timer_interrupt_flag_get(TIMER1,TIMER_INT_CH2)) {
+		/*  */
+		static uint8_t dr = 0;
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER1,TIMER_INT_CH2);
-		if(0 == ccnumber){
-            /* read channel 0 capture value */
-            readvalue1 = timer_channel_capture_value_register_read(TIMER1,TIMER_CH_2);
-            ccnumber = 1;
-        }else if(1 == ccnumber){
-            /* read channel 0 capture value */
-            readvalue2 = timer_channel_capture_value_register_read(TIMER1,TIMER_CH_2);
-
-            if(readvalue2 > readvalue1){
-                count = (readvalue2 - readvalue1); 
-            } else {
-                count = ((0xFFFF - readvalue1) + readvalue2); 
-            }
-            fre = (float)1000000 / count;
-            ccnumber = 0;
+		if(0 == dr){
+            dr = 1;
+			bike_speed_count = 0;
+        }else if(1 == dr){
+			dr = 0;
+			bike_speed = bike_speed_count;
         }
     }
 
 	if(SET == timer_interrupt_flag_get(TIMER1,TIMER_INT_CH3)) {
+		/*  */
+		static uint8_t dr = 0;
         /* clear channel 0 interrupt bit */
         timer_interrupt_flag_clear(TIMER1,TIMER_INT_CH3);
+		if(0 == dr){
+            dr = 1;
+			bike_cadence_count = 0;
+        }else if(1 == dr){
+			dr = 0;
+			bike_cadence = bike_cadence_count;
+        }
     }
 }
 /*!
@@ -211,8 +224,31 @@ void TIMER1_IRQHandler(void) {
 */
 void TIMER2_IRQHandler(void) {
     /* clear TIMER interrupt flag */
-    timer_interrupt_flag_clear(TIMER2,TIMER_INT_CMT);
+    timer_interrupt_flag_clear(TIMER2,TIMER_INT_UP);
+	if(bike_speed_count < 3000) {
+		bike_speed_count++;
+	} else {
+		bike_speed = bike_speed_count;
+	}
+	
+	if(bike_cadence_count < 15000) {
+		bike_cadence_count++;
+	} else {
+		bike_cadence = bike_cadence_count;
+	}
 }
 
+            /* read channel 0 capture value */
+//            readvalue1 = timer_channel_capture_value_register_read(TIMER1,TIMER_CH_2);
 
+            /* read channel 0 capture value */
+//            readvalue2 = timer_channel_capture_value_register_read(TIMER1,TIMER_CH_2);
+
+//            if(readvalue2 > readvalue1){
+//                count = (readvalue2 - readvalue1); 
+//            } else {
+//                count = ((0xFFFF - readvalue1) + readvalue2); 
+//            }
+//            fre = (float)1000000 / count;
+           
 

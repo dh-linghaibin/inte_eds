@@ -11,7 +11,6 @@
 ".\objects\bluetooth.o"
 ".\objects\led.o"
 ".\objects\servo.o"
-".\objects\mpu6050.o"
 ".\objects\signal.o"
 ".\objects\power.o"
 ".\objects\mpu6050_dmp.o"

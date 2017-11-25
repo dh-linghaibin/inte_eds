@@ -13,7 +13,7 @@ void device_init(void) {
 	servo_register();
 	signal_register();
 	power_register();
-	mpu6050_register();
+	mpu6050_dmp_register();
 	rtc_register();
 	button_register();
 	iwdg_register();
@@ -63,7 +63,7 @@ void device_init(void) {
 		//iwdg->init(iwdg);
 	}
 
-	mpu6050_obj *mpu6050 = get_device("mpu");
+	mpu6050dmp_obj *mpu6050 = get_device("mpu");
 	if(mpu6050 != NULL) {
 		mpu6050->init(mpu6050);
 //		mpu6050->power_off(mpu6050);

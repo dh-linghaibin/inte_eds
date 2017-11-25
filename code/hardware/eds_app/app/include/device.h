@@ -15,13 +15,13 @@ extern "C" {
 #include "bluetooth.h"
 #include "led.h"
 #include "servo.h"
-#include "mpu6050.h"
 #include "signal.h"
 #include "power.h"
 #include "Button.h"
 #include "rtc.h"
 #include "l_math.h"
 #include "iwdg.h"
+#include "mpu6050_dmp.h"
 #include "s_delay.h"
 
 void device_init(void);

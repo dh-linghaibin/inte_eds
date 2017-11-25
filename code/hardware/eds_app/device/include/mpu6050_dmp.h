@@ -12,8 +12,7 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "gd32f10x.h"
+#include "l_config.h"
 #include <math.h>
 
 //#define ANBT_I2C_READY		0x00
