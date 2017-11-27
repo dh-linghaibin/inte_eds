@@ -19,8 +19,14 @@ typedef enum {
 	LEFT
 }limit_e;
 
+typedef enum {
+	S_ADD = 0,
+	S_SUB
+}stall_e;
+
 typedef struct _servo_obj {
 	int position; /* 伺服位置 */
+	uint8_t stall;/* 当前档位 */
 
 	void (*init)(struct _servo_obj *servo); /* 初始化 */
 	void (*servo_position)(struct _servo_obj *servo,uint16_t pos); /* 设置位置 */

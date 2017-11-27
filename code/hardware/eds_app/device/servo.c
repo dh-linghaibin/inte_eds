@@ -291,13 +291,13 @@ void EXTI10_15_IRQHandler(void) {
 		}
 		if(gpio_input_bit_get(GPIOB,GPIO_PIN_12) == SET) {
 			if(but_callback != 0) {
-				but_callback(ADD);
+				but_callback(B_ADD);
 			}
 		}
 	} else if(RESET != exti_interrupt_flag_get(EXTI_13)) {
 		exti_interrupt_flag_clear(EXTI_13);
 		if(but_callback != 0) {
-			but_callback(SUB);
+			but_callback(B_SUB);
 		}
 	}
 }

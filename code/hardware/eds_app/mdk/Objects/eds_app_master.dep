@@ -1,5 +1,5 @@
 Dependencies for Project 'eds_app', Target 'master': (DO NOT MODIFY !)
-F (..\app\app.c)(0x5A191C1E)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\app.o --omf_browse .\objects\app.crf --depend .\objects\app.d)
+F (..\app\app.c)(0x5A1BD704)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\app.o --omf_browse .\objects\app.crf --depend .\objects\app.d)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x574E3E26)
 I (..\device\include\bluetooth.h)(0x5A18E08D)
 I (..\frame\include\l_config.h)(0x5A14D3E5)
@@ -39,12 +39,12 @@ I (..\frame\include\dev_obj.h)(0x5A14D3DE)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x574E3E26)
 I (..\frame\include\sram.h)(0x5A14D3E2)
 I (..\device\include\led.h)(0x5A14D450)
-I (..\device\include\servo.h)(0x5A17BF66)
+I (..\device\include\servo.h)(0x5A1B6BC1)
 I (..\device\include\signal.h)(0x5A18E0D1)
 I (..\device\include\mpu6050_dmp.h)(0x5A18E2B8)
 I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x574E3E26)
 I (..\device\include\power.h)(0x5A166798)
-I (..\device\include\Button.h)(0x5A165215)
+I (..\device\include\Button.h)(0x5A1B6B90)
 I (..\device\include\rtc.h)(0x5A14D49E)
 I (..\frame\include\l_math.h)(0x5A14D3FD)
 I (..\device\include\iwdg.h)(0x5A14D4A9)
@@ -92,10 +92,10 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x574E3E26)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x574E3E26)
 I (..\frame\include\sram.h)(0x5A14D3E2)
 I (..\device\include\led.h)(0x5A14D450)
-I (..\device\include\servo.h)(0x5A17BF66)
+I (..\device\include\servo.h)(0x5A1B6BC1)
 I (..\device\include\signal.h)(0x5A18E0D1)
 I (..\device\include\power.h)(0x5A166798)
-I (..\device\include\Button.h)(0x5A165215)
+I (..\device\include\Button.h)(0x5A1B6B90)
 I (..\device\include\rtc.h)(0x5A14D49E)
 I (..\frame\include\l_math.h)(0x5A14D3FD)
 I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x574E3E26)
@@ -103,7 +103,7 @@ I (..\device\include\iwdg.h)(0x5A14D4A9)
 I (..\device\include\mpu6050_dmp.h)(0x5A18E2B8)
 I (..\frame\include\s_delay.h)(0x5A14D3F2)
 F (..\app\task_motion.c)(0x5A164A26)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\task_motion.o --omf_browse .\objects\task_motion.crf --depend .\objects\task_motion.d)
-I (..\device\include\servo.h)(0x5A17BF66)
+I (..\device\include\servo.h)(0x5A1B6BC1)
 I (..\frame\include\l_config.h)(0x5A14D3E5)
 I (C:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include\gd32f10x.h)(0x59560F50)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include\core_cm3.h)(0x57D7BCDA)
@@ -379,8 +379,8 @@ I (..\frame\include\dev_obj.h)(0x5A14D3DE)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x574E3E26)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x574E3E26)
 I (..\frame\include\sram.h)(0x5A14D3E2)
-F (..\device\servo.c)(0x5A17BCA8)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\servo.o --omf_browse .\objects\servo.crf --depend .\objects\servo.d)
-I (..\device\include\servo.h)(0x5A17BF66)
+F (..\device\servo.c)(0x5A1B9799)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\servo.o --omf_browse .\objects\servo.crf --depend .\objects\servo.d)
+I (..\device\include\servo.h)(0x5A1B6BC1)
 I (..\frame\include\l_config.h)(0x5A14D3E5)
 I (C:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include\gd32f10x.h)(0x59560F50)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include\core_cm3.h)(0x57D7BCDA)
@@ -418,7 +418,7 @@ I (..\frame\include\dev_obj.h)(0x5A14D3DE)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x574E3E26)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x574E3E26)
 I (..\frame\include\sram.h)(0x5A14D3E2)
-I (..\device\include\Button.h)(0x5A165215)
+I (..\device\include\Button.h)(0x5A1B6B90)
 F (..\device\signal.c)(0x5A19136B)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\signal.o --omf_browse .\objects\signal.crf --depend .\objects\signal.d)
 I (..\device\include\signal.h)(0x5A18E0D1)
 I (..\frame\include\l_config.h)(0x5A14D3E5)
@@ -540,8 +540,8 @@ I (..\frame\include\sram.h)(0x5A14D3E2)
 I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x574E3E26)
 I (..\gd32\include\iic.h)(0x5A14D4B1)
 I (..\gd32\include\gd32_config.h)(0x5A090760)
-F (..\device\button.c)(0x5A165273)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\button.o --omf_browse .\objects\button.crf --depend .\objects\button.d)
-I (..\device\include\Button.h)(0x5A165215)
+F (..\device\button.c)(0x5A1B6BAF)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\frame\include -I ..\device\include -I ..\gd32\include -I ..\app\include-ID:\03-project\58-inte_eds\code\hardware\eds_app\mdk\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Firmware\Peripherals\inc-IC:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include-D__UVISION_VERSION="521" -D_RTE_ -DGD32F10X_MD -DUSE_STDPERIPH_DRIVER -DGD32F10X_MD-o .\objects\button.o --omf_browse .\objects\button.crf --depend .\objects\button.d)
+I (..\device\include\Button.h)(0x5A1B6B90)
 I (..\frame\include\l_config.h)(0x5A14D3E5)
 I (C:\Keil_v5\ARM\PACK\GigaDevice\GD32F10x_DFP\2.0.0\Device\Include\gd32f10x.h)(0x59560F50)
 I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta12\CMSIS\Include\core_cm3.h)(0x57D7BCDA)

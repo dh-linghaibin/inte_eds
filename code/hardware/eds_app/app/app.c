@@ -96,7 +96,7 @@ void position_cb(void) {
 }
 
 void calibration_cb(void) {
-	posstion_num = 300;
+	//posstion_num = 0;
 }
 
 void right_limit_cb(void) {
@@ -114,33 +114,86 @@ void left_limit_cb(void) {
 }
 
 
-static const uint16_t stall[11] = {2000,2500,3000,3500,4000,4500,5000,5500,6000,6600,7000};
+static const uint16_t stall_position[11] = {0,200,400,600,800,1000,1200,1400,1600,1800,2000};
 
-void to_pos(servo_obj  *servo,uint8_t stal) {
-	if(stall[stal] > posstion_num) {
-		moto_dr = 0;
-		servo->speed_set(servo,1000);
-		while(posstion_num < 600) {
-			uint16_t last = 600 - posstion_num;
-			if(last > 100) {
-				servo->speed_set(servo,800);
-			} else if(last > 80) {
-				servo->speed_set(servo,700);
-			} else if(last > 60) {
-				servo->speed_set(servo,500);
-			} else if(last > 40) {
-				servo->speed_set(servo,400);
-			} else if(last > 20) {
-				servo->speed_set(servo,300);
+int servo_step(servo_obj  *servo,power_obj *power,stall_e stall) {
+	switch(stall) {
+		case S_ADD:{
+			if(servo->stall < 10) { /* 档位只有十档 */
+				servo->stall++;
 			}
-		}
-		servo->speed_set(servo,0);
-	} else {
-		
+			
+		} break;
+		case S_SUB:{
+				if(servo->stall > 0) {
+					servo->stall--;
+				}
+		}break;
 	}
+	if(stall_position[servo->stall] > posstion_num) {
+		uint16_t to_setp = stall_position[servo->stall] - posstion_num;
+		if(to_setp > 10) {
+			moto_dr = 0;
+			servo->speed_set(servo,1000);
+			uint8_t breaks = 0;
+			uint16_t last = 0;
+			while(posstion_num <= (stall_position[servo->stall])) {
+				last = power->get_moto_current(power);
+				if(last > 280) {
+
+				} else if(last > 280) {
+					breaks = 5;
+				} else if(last > 250) {
+					breaks = 10;
+				} else if(last > 210) {
+					breaks = 20;
+				} else if(last > 180) {
+					breaks = 30;
+				} else {
+					breaks = 35;
+				}
+			}
+			servo->speed_set(servo,0);
+		} else {
+			return 1;
+		}
+	} else {
+		uint16_t to_setp = posstion_num - stall_position[servo->stall];
+		if(to_setp > 10) {
+			moto_dr = 0;
+			servo->speed_set(servo,-1000);
+			uint8_t breaks = 0;
+			uint16_t last = 0;
+			while(posstion_num >= (stall_position[servo->stall])) {
+				last = power->get_moto_current(power);
+				if(last > 280) {
+
+				} else if(last > 280) {
+					breaks = 5;
+				} else if(last > 250) {
+					breaks = 10;
+				} else if(last > 210) {
+					breaks = 20;
+				} else if(last > 180) {
+					breaks = 30;
+				} else {
+					breaks = 35;
+				}
+			}
+			servo->speed_set(servo,0);
+		} else {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 uint16_t last;
+#define erroe_num 200
+static uint16_t rotate_num_error = 0;
+static uint16_t rotate_num_error2 = 0; /* 二次系数累加 提高精度 */
+
+#define but 0
 
 simple_fsm(moto,
 	uint8_t    but_sub_count;
@@ -170,11 +223,16 @@ fsm_init_name(moto)
 	me.servo->right_limit_cb(right_limit_cb);
 	me.servo->left_limit_cb(left_limit_cb);
 	while(1) {
+
 		WaitX(1000);
+
+		uint16_t step = 600;
+		uint16_t before = posstion_num;
+	
 		moto_dr = 0;
 		me.servo->speed_set(me.servo,1000);
 		uint8_t breaks = 0;
-		while(posstion_num < (600-breaks)) {
+		while(posstion_num < (step)) {
 			//WaitX(0);
 			last = me.power->get_moto_current(me.power);
 			if(last > 280) {
@@ -192,48 +250,44 @@ fsm_init_name(moto)
 			}
 		}
 		me.servo->speed_set(me.servo,0);
+		/* 走完之后再计算误差 */
+		uint16_t after = posstion_num - before;
+	
+		uint16_t wc = after+rotate_num_error;
+
+		posstion_num -= wc/erroe_num;
+		rotate_num_error = wc%erroe_num;
 		
+		rotate_num_error2 += wc/erroe_num;/* 系数累加 */
+		if(rotate_num_error2 >= 10) {
+			rotate_num_error2 = 0;
+			rotate_num_error2 -= 20;
+		}
+
 		WaitX(1000);
 		moto_dr = 1;
 		me.servo->speed_set(me.servo,-1000);
-		while(posstion_num > 35) {
+		while(posstion_num > 1) {
 			WaitX(0);
 		}
 		me.servo->speed_set(me.servo,0);
-		
+
 //		WaitX(2);
-//		if(me.button->get(me.button,SUB) == 0) {
+//		if(me.button->get(me.button,B_SUB) == 0) {
 //			moto_dr = 0;
 //			me.servo->speed_set(me.servo,1000);
-//		} else if(me.button->get(me.button,ADD) == 0) {
+//		} else if(me.button->get(me.button,B_ADD) == 0) {
 //			moto_dr = 1;
 //			me.servo->speed_set(me.servo,-1000);
 //		} else {
 //			me.servo->speed_set(me.servo,0);
 //		}
-
-//		if(me.button->get(me.button,SUB) == 0) {
-//			if(me.but_sub_count == 30) {
+	
+//		WaitX(5);
+//		if(me.button->get(me.button,B_SUB) == 0) {
+//			if(me.but_sub_count == 20) {
 //				me.but_sub_count++;
-//				moto_dr = 0;
-//				me.servo->speed_set(me.servo,1000);
-//				while(posstion_num < 590) {
-//					WaitX(0);
-//					me.power->get_moto_current(me.power);
-//					uint16_t last = 600 - posstion_num;
-//					if(last > 100) {
-//						me.servo->speed_set(me.servo,800);
-//					} else if(last > 80) {
-//						me.servo->speed_set(me.servo,700);
-//					} else if(last > 60) {
-//						me.servo->speed_set(me.servo,500);
-//					} else if(last > 40) {
-//						me.servo->speed_set(me.servo,400);
-//					} else if(last > 20) {
-//						me.servo->speed_set(me.servo,300);
-//					}
-//				}
-//				me.servo->speed_set(me.servo,0);
+//				servo_step(me.servo,me.power,S_ADD);
 //			} else {
 //				me.but_sub_count++;
 //			}
@@ -241,15 +295,10 @@ fsm_init_name(moto)
 //			me.but_sub_count = 0;
 //		}
 
-//		if(me.button->get(me.button,ADD) == 0) {
-//			if(me.but_add_count == 30) {
+//		if(me.button->get(me.button,B_ADD) == 0) {
+//			if(me.but_add_count == 20) {
 //				me.but_add_count++;
-//				moto_dr = 1;
-//				me.servo->speed_set(me.servo,-1000);
-//				while(posstion_num > 20) {
-//					WaitX(0);
-//				}
-//				me.servo->speed_set(me.servo,0);
+//				servo_step(me.servo,me.power,S_SUB);
 //			} else {
 //				me.but_add_count++;
 //			}

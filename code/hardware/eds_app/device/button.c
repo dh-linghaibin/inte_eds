@@ -61,7 +61,7 @@ static void button_init(struct _button_obj *button) {
     \retval     none
 */
 int button_get(struct _button_obj *button,enum BUTTON_TYPE type) {
-	if(type == ADD) {
+	if(type == B_ADD) {
 		return gpio_input_bit_get(GPIOB,GPIO_PIN_12);
 	} else {
 		return gpio_input_bit_get(GPIOB,GPIO_PIN_13);

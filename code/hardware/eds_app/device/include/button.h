@@ -15,8 +15,8 @@ extern "C" {
 #include "l_config.h"
 
 enum BUTTON_TYPE{
-	ADD = 0,
-	SUB,
+	B_ADD = 0,
+	B_SUB,
 };
 
 typedef struct _button_obj {
