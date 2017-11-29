@@ -42,8 +42,8 @@
 
 /* select a system clock by uncommenting the following line */
 /* use IRC8M */
-#define __SYSTEM_CLOCK_48M_PLL_IRC8M            (uint32_t)(48000000)
-//#define __SYSTEM_CLOCK_72M_PLL_IRC8M            (uint32_t)(72000000)
+//#define __SYSTEM_CLOCK_48M_PLL_IRC8M            (uint32_t)(48000000)
+#define __SYSTEM_CLOCK_72M_PLL_IRC8M            (uint32_t)(72000000)
 //#define __SYSTEM_CLOCK_108M_PLL_IRC8M           (uint32_t)(108000000)
 
 /* use HXTAL (XD series CK_HXTAL = 8M, CL series CK_HXTAL = 25M) */

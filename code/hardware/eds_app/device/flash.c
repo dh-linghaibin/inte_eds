@@ -18,11 +18,11 @@ static uint32_t flash_read32(uint32_t address) {
   return (temp2<<16)+temp1;
 }
 
-static void flash_init() {
-	fmc_unlock();
+static void flash_init(struct _flash_obj *flash) {
+	//fmc_unlock();
 }
 
-int flash_write(uint32_t address,uint32_t data) {
+static int flash_write(struct _flash_obj *flash,uint32_t address,uint32_t data) {
 	uint16_t read_i = 0;
 	uint32_t addr  = 0;
 	uint8_t page_num = 0;
@@ -51,14 +51,20 @@ int flash_write(uint32_t address,uint32_t data) {
 	return 0;
 }
 
-int flash_read(uint32_t address,uint32_t *read_data) {
+static int flash_read(struct _flash_obj *flash,uint32_t address,uint32_t *read_data) {
 	uint32_t addr = (address/PAGE_SIZE)*1024 + FLASH_START + (address%PAGE_SIZE);
 	*read_data = flash_read32(addr);
 	return 0; 
 }
 
 void flash_rrgister(void) {
-	
+	struct _flash_obj *flash = GET_DAV(struct _flash_obj);
+
+	flash->init = &flash_init;
+	flash->write = &flash_write;
+	flash->read = &flash_read;
+
+    register_dev_obj("fla",flash);
 }
 
 

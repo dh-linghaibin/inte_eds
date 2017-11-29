@@ -24,25 +24,25 @@ typedef enum {
 	D_ERROR = -1
 }dev_state_e;
 
-typedef struct _gpio_obj {
-	int num;
-}gpio_obj;
+//typedef struct _gpio_obj {
+//	int num;
+//}gpio_obj;
 
-typedef struct _pwm {
-	int num;
-}pwm;
+//typedef struct _pwm {
+//	int num;
+//}pwm;
 
-typedef struct _adc_obj {
-	int num;
-}adc_obj;
+//typedef struct _adc_obj {
+//	int num;
+//}adc_obj;
 
-typedef struct _iic_obj {
-	int num;
-}iic_obj;
+//typedef struct _iic_obj {
+//	int num;
+//}iic_obj;
 
-typedef struct _iic_flash {
-	int num;
-}flash_obj;
+//typedef struct _iic_flash {
+//	int num;
+//}flash_obj;
 
 typedef struct _dev_obj {
     char name[10];/*设备名称*/   

@@ -389,11 +389,6 @@
               <FileType>1</FileType>
               <FilePath>..\app\device.c</FilePath>
             </File>
-            <File>
-              <FileName>task_motion.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\task_motion.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -428,11 +423,6 @@
               <FileName>coroutine.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\frame\coroutine.c</FilePath>
-            </File>
-            <File>
-              <FileName>l_os.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\frame\l_os.c</FilePath>
             </File>
             <File>
               <FileName>fsm.h</FileName>
@@ -494,6 +484,11 @@
               <FileType>1</FileType>
               <FilePath>..\device\flash.c</FilePath>
             </File>
+            <File>
+              <FileName>sys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\device\sys.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -513,16 +508,6 @@
               <FileName>gd32f10x_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\gd32\gd32f10x_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\gd32\port.c</FilePath>
-            </File>
-            <File>
-              <FileName>port.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\gd32\port.s</FilePath>
             </File>
           </Files>
         </Group>

@@ -163,7 +163,7 @@ bool i2cRead(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf) {
 		len--;
 	}
 	i2c_ack_config(I2C0, I2C_ACK_ENABLE);
-    return 1;
+    return TRUE;
 }
 
 int8_t i2cwrite(uint8_t addr, uint8_t reg, uint8_t len, uint8_t * data)

@@ -11,6 +11,12 @@ static void(*left_limit_cb)(void);  /* 左限位回调 */
 static void(*right_limit_cb)(void); /* 右限位回调 */
 static void(*calibration_cb)(void); /* 校准回调 */
 static void(*position_cb)(void);	 /* 光栅回调 */
+extern void (*but_callback)(enum BUTTON_TYPE type);/* 按钮回调 */
+
+static const uint16_t stall_position[11] = {0,200,400,600,800,1000,1200,1400,1600,1800,2000};
+static int posstion_num = 0;			/* 电机位置 */
+static uint8_t moto_dr = 0;				/* 电机方向 */
+static uint16_t posstion_num_error = 0; /* 误差修正 */
 
 /**
     \brief      configure servo_signal_init
@@ -156,16 +162,6 @@ static int servo_power_on(struct _servo_obj *m) {
 	
 	return D_OK;
 }
-
-/**
-    \brief      servo_power_on
-    \param[in]  struct _servo_obj
-    \param[out] none
-    \retval     none
-*/
-static void servo_servo_position(struct _servo_obj *servo,uint16_t pos) {
-	
-}
 /**
     \brief      servo_power_on
     \param[in]  struct _servo_obj
@@ -174,9 +170,11 @@ static void servo_servo_position(struct _servo_obj *servo,uint16_t pos) {
 */
 static void servo_moto_set_speed(struct _servo_obj *servo,int speed) {
 	if(speed >= 0) {
+		moto_dr = 0;
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0); 
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,speed); 
 	} else {
+		moto_dr = 1;
 		speed = 0-speed;
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,speed); 
 		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0); 
@@ -188,13 +186,101 @@ static void servo_moto_set_speed(struct _servo_obj *servo,int speed) {
     \param[out] none
     \retval     none
 */
-int servo_get_limit(struct _servo_obj *servo,limit_e dr) {
+static int servo_get_limit(struct _servo_obj *servo,limit_e dr) {
 	if(dr == RIGHT) {
 		return gpio_input_bit_get(GPIOA,GPIO_PIN_12);
 	} else {
 		return gpio_input_bit_get(GPIOC,GPIO_PIN_14);
 	}
-	
+}
+/**
+    \brief      servo_get_limit
+    \param[in]  struct _servo_obj
+    \param[out] none
+    \retval     none
+*/
+static int servo_to_stall(servo_obj  *servo,power_obj *power,stall_e stall) {
+	switch(stall) {
+		case S_ADD:{
+			if(servo->stall < 10) { /* 档位只有十档 */
+				servo->stall++;
+			} else {
+				return 0;
+			}
+		} break;
+		case S_SUB:{
+				if(servo->stall > 0) {
+					servo->stall--;
+				} else {
+					return 0;
+				}
+		}break;
+	}
+	if(stall_position[servo->stall] > posstion_num) {
+		uint16_t to_setp = stall_position[servo->stall] - posstion_num; 
+		if(to_setp > 10) {
+			if(servo->get_limit(servo,RIGHT) == 0) { /* 位置保护 */
+				servo->speed_set(servo,1000);
+				uint8_t l_breaks = 0;	 /* 提前刹车值 */
+				uint32_t last_power = 0; /* 功率缓冲值 */
+				uint16_t time_out = 0;	 /* 超时保护时间 */
+				while(posstion_num < (stall_position[servo->stall]) - l_breaks) {			 /* 计算刹车量 */	
+					last_power = power->get_moto_current(power) * power->get_battery(power); /* 计算功率 */
+					if(last_power > 410000) {
+						l_breaks = 0;
+					} else if(last_power > 140000) {
+						//l_breaks = (uint8_t)((410000 - last_power)/2650);
+					}
+					/* 超时计算 */
+					if(time_out < 60000) {
+						time_out++;
+					} else {
+						time_out = 0;
+//						servo->speed_set(servo,0);
+//						return 3;
+					}
+				}
+				servo->speed_set(servo,0);
+			} else {
+				return 2;
+			}
+		} else {
+			return 1;
+		}
+	} else {
+		uint16_t to_setp = posstion_num - stall_position[servo->stall];
+		if(to_setp > 10) {
+			if(servo->get_limit(servo,LEFT) == 0) { /* 位置保护 */
+				servo->speed_set(servo,-1000);
+				uint8_t l_breaks = 0;	 /* 提前刹车值 */
+				uint32_t last_power = 0; /* 功率缓冲值 */
+				uint16_t time_out = 0;	 /* 超时保护时间 */
+				while(posstion_num > (stall_position[servo->stall] + l_breaks)) {
+					last_power = power->get_moto_current(power) * power->get_battery(power); /* 计算功率 */
+					if(last_power > 410000) {
+						l_breaks = 0;
+					} else if(last_power > 140000) {
+						//l_breaks = (uint8_t)((410000 - last_power)/2650);
+					}
+
+					/* 超时计算 */
+					if(time_out < 60000) {
+						time_out++;
+					} else {
+						time_out = 0;
+//						servo->speed_set(servo,0);
+//						return 3;
+					}
+				}
+				servo->speed_set(servo,0);
+			} else {
+				return 2;
+			}
+		} else {
+			return 1;
+		}
+	}
+	return 0;
 }
 /**
     \brief      servo_left_limit_cb
@@ -233,6 +319,24 @@ static void servo_position_cb(void(*f)(void)) {
 	position_cb = f;
 }
 /**
+    \brief      servo_left_limit_cb
+    \param[in]  void(*f)(void)
+    \param[out] none
+    \retval     none
+*/
+int servo_get_posstion(struct _servo_obj *servo){
+	return posstion_num;
+}
+/**
+    \brief      servo_set_posstion
+    \param[in]  void(*f)(void)
+    \param[out] none
+    \retval     none
+*/
+void servo_set_posstion(struct _servo_obj *servo,int posstion){
+	posstion_num = posstion;
+}
+/**
     \brief      servo_register
     \param[in]  none
     \param[out] none
@@ -250,6 +354,9 @@ void servo_register(void) {
 	servo->right_limit_cb = &servo_right_limit_cb;
 	servo->speed_set      = &servo_moto_set_speed;
 	servo->get_limit	  = &servo_get_limit;
+	servo->to_stall		  = &servo_to_stall;
+	servo->get_posstion   = &servo_get_posstion;
+	servo->set_posstion   = &servo_set_posstion;
 
     register_dev_obj("ser",servo);
 }
@@ -257,34 +364,49 @@ void servo_register(void) {
 void EXTI0_IRQHandler(void) {
 	if (RESET != exti_interrupt_flag_get(EXTI_0)) {
 		exti_interrupt_flag_clear(EXTI_0);
+		//posstion_num = 0; /* 电机位置校准 */
 		if(calibration_cb != 0) {
 			calibration_cb();
 		}
 	}
 }
 
+
 void EXTI1_IRQHandler(void) {
 	if (RESET != exti_interrupt_flag_get(EXTI_1)) {
 		exti_interrupt_flag_clear(EXTI_1);
-		if(position_cb != 0) {
-			position_cb();
+		if(moto_dr == 0) {
+			posstion_num++;
+//			if(posstion_num_error >= 300) {
+//				posstion_num_error = 0;
+//				posstion_num -= 1;
+//			} else {
+//				posstion_num_error++;
+//			}
+		} else {
+			posstion_num--;
 		}
+//		if(position_cb != 0) {
+//			position_cb();
+//		}
 	}
 }
-
-#include "Button.h"
-
-extern void (*but_callback)(enum BUTTON_TYPE type);
 
 void EXTI10_15_IRQHandler(void) {
     if (RESET != exti_interrupt_flag_get(EXTI_14)) {
         exti_interrupt_flag_clear(EXTI_14);
+		/* 关闭电机 限位位置 电机不允许运行 */
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0); 
+		timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0); 
 		if(left_limit_cb != 0) {
 			left_limit_cb();
 		}
     } else if(RESET != exti_interrupt_flag_get(EXTI_12)) {
 		exti_interrupt_flag_clear(EXTI_12);
 		if(gpio_input_bit_get(GPIOA,GPIO_PIN_12) == SET) {
+			/* 关闭电机 限位位置 电机不允许运行 */
+			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_1,0); 
+			timer_channel_output_pulse_value_config(TIMER0,TIMER_CH_2,0); 
 			if(right_limit_cb != 0) {
 				right_limit_cb();
 			}

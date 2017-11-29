@@ -118,9 +118,9 @@ void timer_config(void) {
     output enable feature.
     use the locking parameters level 0.
     ----------------------------------------------------------------------- */
-    timer_oc_parameter_struct timer_ocintpara;
+    //timer_oc_parameter_struct timer_ocintpara;
     timer_parameter_struct timer_initpara;
-    timer_break_parameter_struct timer_breakpara;
+    //timer_break_parameter_struct timer_breakpara;
 
     rcu_periph_clock_enable(RCU_TIMER2);
 
@@ -144,9 +144,9 @@ void timer_config(void) {
 
 static void signal_init(struct _signal_obj *signal) {
 	gpio_configuration(); 
-	nvic_configuration();
-	timer_configuration();
-	timer_config();
+//	nvic_configuration();
+//	timer_configuration();
+//	timer_config();
 }
 
 uint16_t signal_get_speed(struct _signal_obj *signal) {
@@ -237,18 +237,5 @@ void TIMER2_IRQHandler(void) {
 		bike_cadence = bike_cadence_count;
 	}
 }
-
-            /* read channel 0 capture value */
-//            readvalue1 = timer_channel_capture_value_register_read(TIMER1,TIMER_CH_2);
-
-            /* read channel 0 capture value */
-//            readvalue2 = timer_channel_capture_value_register_read(TIMER1,TIMER_CH_2);
-
-//            if(readvalue2 > readvalue1){
-//                count = (readvalue2 - readvalue1); 
-//            } else {
-//                count = ((0xFFFF - readvalue1) + readvalue2); 
-//            }
-//            fre = (float)1000000 / count;
            
 
