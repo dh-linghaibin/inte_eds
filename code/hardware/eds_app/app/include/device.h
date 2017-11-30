@@ -23,6 +23,7 @@ extern "C" {
 #include "iwdg.h"
 #include "mpu6050_dmp.h"
 #include "s_delay.h"
+#include "flash.h"
 
 void device_init(void);
 

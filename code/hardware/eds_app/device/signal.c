@@ -144,9 +144,9 @@ void timer_config(void) {
 
 static void signal_init(struct _signal_obj *signal) {
 	gpio_configuration(); 
-//	nvic_configuration();
-//	timer_configuration();
-//	timer_config();
+	nvic_configuration();
+	timer_configuration();
+	timer_config();
 }
 
 uint16_t signal_get_speed(struct _signal_obj *signal) {

@@ -17,6 +17,7 @@ void device_init(void) {
 	rtc_register();
 	button_register();
 	iwdg_register();
+	flash_rrgister();
 
 	bluetooth_obj *ble = get_device("ble");
 	if(ble != NULL) {
@@ -65,13 +66,17 @@ void device_init(void) {
 
 	mpu6050dmp_obj *mpu6050 = get_device("mpu");
 	if(mpu6050 != NULL) {
-		mpu6050->init(mpu6050);
+		//mpu6050->init(mpu6050);
 //		mpu6050->power_off(mpu6050);
 	}
-	//AnBT_DMP_MPU6050_Init();//6050DMP³õÊ¼»¯
-	//pmu_to_standbymode(WFI_CMD);
 
+	flash_obj *flash = get_device("fla");
+	if(flash != NULL) {
+		flash->init(flash);
+	}
+
+	//pmu_to_standbymode(WFI_CMD);
 	//rcu_periph_clock_enable(RCU_PMU);
-//	pmu_wakeup_pin_enable();
+	//	pmu_wakeup_pin_enable();
 }
 

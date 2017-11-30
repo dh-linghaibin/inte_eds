@@ -8,14 +8,14 @@
 #include "flash.h"
 
 #define PAGE_SIZE		((uint32_t)(1024))				   /* 一页的字节数 */
-#define FLASH_START		((uint32_t)(0x08000000 + 0x04000)) /* flash获取地址120k */
+#define FLASH_START		((uint32_t)(0x08000000 + 0x0c000)) /* flash获取地址120k */
 static uint32_t page_merry[PAGE_SIZE/4];				   /* 内存缓冲 */
 
 static uint32_t flash_read32(uint32_t address) {
-  uint32_t temp1,temp2;
-  temp1=*(__IO uint16_t*)address; 
-  temp2=*(__IO uint16_t*)(address+2); 
-  return (temp2<<16)+temp1;
+	uint32_t temp1,temp2;
+	temp1=*(__IO uint16_t*)address; 
+	temp2=*(__IO uint16_t*)(address+2); 
+	return (temp2<<16)+temp1;
 }
 
 static void flash_init(struct _flash_obj *flash) {
@@ -52,7 +52,7 @@ static int flash_write(struct _flash_obj *flash,uint32_t address,uint32_t data) 
 }
 
 static int flash_read(struct _flash_obj *flash,uint32_t address,uint32_t *read_data) {
-	uint32_t addr = (address/PAGE_SIZE)*1024 + FLASH_START + (address%PAGE_SIZE);
+	uint32_t addr = (address/PAGE_SIZE)*1024 + FLASH_START + (address%PAGE_SIZE) * 4;
 	*read_data = flash_read32(addr);
 	return 0; 
 }

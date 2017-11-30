@@ -20,6 +20,7 @@
 #include "fsm.h"
 #include "sys.h"
 #include "device.h"
+#include "flash.h"
 
 
 /*
@@ -70,7 +71,8 @@ simple_fsm(moto,
 	uint8_t    but_add_count;
 	servo_obj  *servo;
 	button_obj *button; 
-	power_obj *power; 		)
+	power_obj *power;
+	flash_obj *flash;		)
 
 fsm_init_name(moto)
 	me.servo = get_device("ser");
@@ -88,13 +90,51 @@ fsm_init_name(moto)
 		fsm_task_off(LedTask); /* get power faild out the task */
 		return 0;
 	}
+	me.flash = get_device("fla");
+	if(me.flash == NULL) {
+		fsm_task_off(LedTask); /* get flash faild out the task */
+		return 0;
+	}
+	uint32_t c_stall = 0;
+	me.flash->read(me.flash,C_STALL,&c_stall);
+	if(c_stall <= 10) {
+		me.servo->stall = c_stall;
+	} else {
+		me.servo->stall = 0;
+		me.flash->write(me.flash,C_STALL,me.servo->stall);
+	}
+	me.flash->read(me.flash,C_POSSTION_NUM,&c_stall);
+	if(c_stall <= 6000) {
+		me.servo->set_posstion(me.servo,c_stall);
+	} else {
+		me.servo->set_posstion(me.servo,0);
+		me.flash->write(me.flash,C_POSSTION_NUM,me.servo->get_posstion(me.servo));
+	}
+	printf("stall %d \r\n",me.servo->stall);
+	printf("get_posstion %d \r\n",me.servo->get_posstion(me.servo));
 	while(1) {
 		WaitX(5);
 		if(me.button->get(me.button,B_SUB) == 0) {
 			if(me.but_sub_count < 51) {
 				if(me.but_sub_count == 10) {
 					me.but_sub_count++;
-					me.servo->to_stall(me.servo,me.power,S_ADD);
+					switch(me.servo->to_stall(me.servo,me.power,S_ADD)) {
+						case 0:/* 换挡成功 */
+							me.flash->write(me.flash,C_STALL,me.servo->stall);
+						break;
+						case 1:/* 电流过流 */
+							printf("error 1 \r\n");
+						break;
+						case 2:/* 时间超时 */
+							printf("error 2 \r\n");
+						break;
+						case 3:/* 在限位 */
+							printf("error 3 \r\n");
+						break;
+					}
+					WaitX(250);
+					me.flash->write(me.flash,C_POSSTION_NUM,me.servo->get_posstion(me.servo));
+					printf("posstion_num %d \r\n",me.servo->get_posstion(me.servo));
 				} else {
 					me.but_sub_count++;
 				}
@@ -114,7 +154,23 @@ fsm_init_name(moto)
 			if(me.but_add_count < 51) {
 				if(me.but_add_count == 10) {
 					me.but_add_count++;
-					me.servo->to_stall(me.servo,me.power,S_SUB);
+					switch( me.servo->to_stall(me.servo,me.power,S_SUB) ) {
+						case 0:/* 换挡成功 */
+							me.flash->write(me.flash,C_STALL,me.servo->stall);
+						break;
+						case 1:/* 电流过流 */
+							printf("error 1 \r\n");
+						break;
+						case 2:/* 时间超时 */
+							printf("error 2 \r\n");
+						break;
+						case 3:/* 在限位 */
+							printf("error 3 \r\n");
+						break;
+					}
+					WaitX(250);
+					me.flash->write(me.flash,C_POSSTION_NUM,me.servo->get_posstion(me.servo));
+					printf("posstion_num %d \r\n",me.servo->get_posstion(me.servo));
 				} else {
 					me.but_add_count++;
 				}
@@ -131,6 +187,48 @@ fsm_init_name(moto)
 	}
 fsm_end
 
+/* 自动变速测试 */
+simple_fsm(t_auto,
+	mpu6050dmp_obj *mpu6050;
+	signal_obj *signal;
+	servo_obj  *servo;
+	power_obj *power;
+	flash_obj *flash;
+)
+
+fsm_init_name(t_auto)
+	me.mpu6050 = get_device("mpu");
+	if(me.mpu6050 == NULL) {
+		fsm_task_off(t_auto); /* get mpu6050 faild out the task */
+		return 0;
+	}
+	me.signal = get_device("sig");
+	if(me.signal == NULL) {
+		fsm_task_off(t_auto); /* get signal faild out the task */
+		return 0;
+	}
+	me.servo = get_device("ser");
+	if(me.servo == NULL) {
+		fsm_task_off(t_auto); /* get servo faild out the task */
+		return 0;
+	}
+	me.power = get_device("pow");
+	if(me.power == NULL) {
+		fsm_task_off(t_auto); /* get power faild out the task */
+		return 0;
+	}
+	me.flash = get_device("fla");
+	if(me.flash == NULL) {
+		fsm_task_off(t_auto); /* get flash faild out the task */
+		return 0;
+	}
+	while(1) {
+		WaitX(250);  
+		printf("signal %d \r\n",me.signal->get_speed(me.signal));
+		printf("cadence %d \r\n",me.signal->get_cadence(me.signal));
+	}
+fsm_end
+
 extern uint8_t run_1ms_flag;
 int main() {
 	//app_set();
@@ -138,12 +236,14 @@ int main() {
 	device_init();
 
 	fsm_task_on(LedTask);
-	fsm_task_on(moto);
+	fsm_task_on(t_auto);
+	//fsm_task_on(moto);
 	while(1) {
 		if(run_1ms_flag >= 1) {
 			run_1ms_flag = 0;
 			fsm_going(LedTask);
 			fsm_going(moto);
+			fsm_going(t_auto);
 		}
 	}
 //	return 0;
