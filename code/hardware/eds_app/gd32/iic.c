@@ -43,7 +43,7 @@ static void gpio_config(void) {
 */
 static void i2c_config(void) {
     /* I2C clock configure */
-    i2c_clock_config(I2C0, 100000, I2C_DTCY_2);
+    i2c_clock_config(I2C0, 400000U, I2C_DTCY_2);
     /* I2C address configure */
     i2c_mode_addr_config(I2C0, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, 0x82);
     /* enable I2C0 */

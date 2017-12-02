@@ -23,9 +23,7 @@
 #include "flash.h"
 
 
-/*
- * task for led
- */
+/* 指示 */
 simple_fsm(LedTask,
 	led_obj        *led;	
 	power_obj      *power;
@@ -62,10 +60,7 @@ fsm_init_name(LedTask)
 	}
 fsm_end
 
-
-
-
-
+/* 手动变速 */
 simple_fsm(moto,
 	uint8_t    but_sub_count;
 	uint8_t    but_add_count;
@@ -194,6 +189,8 @@ simple_fsm(t_auto,
 	servo_obj  *servo;
 	power_obj *power;
 	flash_obj *flash;
+	button_obj *button; 
+	uint8_t but_sub_count;
 )
 
 fsm_init_name(t_auto)
@@ -222,10 +219,35 @@ fsm_init_name(t_auto)
 		fsm_task_off(t_auto); /* get flash faild out the task */
 		return 0;
 	}
+	me.button = get_device("but");	
+	if(me.button == NULL) {
+		fsm_task_off(moto); /* get button faild out the task */
+		return 0;
+	}
 	while(1) {
 		WaitX(250);  
-		printf("signal %d \r\n",me.signal->get_speed(me.signal));
-		printf("cadence %d \r\n",me.signal->get_cadence(me.signal));
+//		printf("signal %d \r\n",me.signal->get_speed(me.signal));
+//		printf("cadence %d \r\n",me.signal->get_cadence(me.signal));
+		me.mpu6050->get_pry(me.mpu6050);
+//		if(me.mpu6050->pitch > 0) {
+//			printf("上坡 %f2\r\n",me.mpu6050->pitch);
+//		} else {
+//			printf("下坡 %f2\r\n",me.mpu6050->pitch);
+//		}
+		if(me.button->get(me.button,B_SUB) == 0) {
+			if(me.but_sub_count < 3) {
+				if(me.but_sub_count == 2) {
+					me.but_sub_count++;
+					me.mpu6050->zero(me.mpu6050);
+					printf("归零 \r\n");
+				} else {
+					me.but_sub_count++;
+				}
+			}
+		} else {
+			me.but_sub_count = 0;
+		}
+		printf("mpu : %f2    %f2    %f2  speed:%d  cadence:%d \r\n",me.mpu6050->yaw,me.mpu6050->pitch,me.mpu6050->roll,me.signal->get_speed(me.signal),me.signal->get_cadence(me.signal));
 	}
 fsm_end
 

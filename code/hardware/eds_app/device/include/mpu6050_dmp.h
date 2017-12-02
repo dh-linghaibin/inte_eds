@@ -1195,7 +1195,8 @@ void AnBT_DMP_MPU6050_SEND_DATA_FUN(void);
 typedef struct _mpu6050dmp_obj{
 	float yaw,roll,pitch;
 	void (*init)(struct _mpu6050dmp_obj *mpu);
-	int (*get_pry)(struct _mpu6050dmp_obj *mpu);
+	void (*zero)(struct _mpu6050dmp_obj *mpu);
+	int  (*get_pry)(struct _mpu6050dmp_obj *mpu);
 	void (*power_off)(struct _mpu6050dmp_obj *mpu);
 }mpu6050dmp_obj;
 

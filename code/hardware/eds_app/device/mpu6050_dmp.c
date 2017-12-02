@@ -2256,6 +2256,7 @@ static void run_self_test(void) {
         dmp_set_accel_bias(accel);
 	}
 }
+
 //
 int mpu_write_mem(unsigned short mem_addr, unsigned short length, unsigned char *data) {
     unsigned char tmp[2];
@@ -2482,7 +2483,7 @@ uint8_t AnBT_DMP_MPU6050_DEV_CFG(void) {
 		
     mpu_set_sensors(0);
     
-		return 0;
+	return 0;
 }
 
 
@@ -2507,8 +2508,6 @@ void AnBT_DMP_MPU6050_SEND_DATA_FUN(void)	//dmp读取函数
 	dmp_read_fifo(gyro, accel, anbt_mpu6050_quat_data, &sensor_timestamp, &sensors, &more);	 
 //	ANBT_SEND_DMP_DATA(anbt_mpu6050_quat_data);		//发送DMP数据
 }
-
-
 //		{
 //			unsigned long sensor_timestamp;
 //			short gyro[3], accel[3], sensors;
@@ -2575,6 +2574,31 @@ static int mpu6050_dmp_get_pry(struct _mpu6050dmp_obj *mpu) {
 	return -1;
 }
 
+static void mpu6050_dmp_zero(struct _mpu6050dmp_obj *mpu) {
+	int result;
+	long gyro[3] = {20,20,20}, accel[3] = {20,20,20};
+	//
+	result = mpu_run_self_test(gyro, accel);
+	if (result == 0x0) 
+	{
+		/* Test passed. We can trust the gyro data here, so let's push it down
+		* to the DMP.
+		*/
+		float sens;
+		unsigned short accel_sens;
+		mpu_get_gyro_sens(&sens);
+		gyro[0] = (long)(gyro[0] * sens);
+		gyro[1] = (long)(gyro[1] * sens);
+		gyro[2] = (long)(gyro[2] * sens);
+		dmp_set_gyro_bias(gyro);
+		mpu_get_accel_sens(&accel_sens);
+		accel[0] *= accel_sens;
+		accel[1] *= accel_sens;
+		accel[2] *= accel_sens;
+		dmp_set_accel_bias(accel);
+	}
+}
+
 static void mpu6050_dmp_power_off(struct _mpu6050dmp_obj *mpu) {
 	iic_write_byte(0xd0,0x3f,MPU6050_RA_PWR_MGMT_2);
 	iic_write_byte(0xd0,0x40,MPU6050_RA_PWR_MGMT_1);
@@ -2595,6 +2619,7 @@ void mpu6050_dmp_register(void) {
 	mpu6050->init      = &mpu6050_dmp_init;
 	mpu6050->get_pry   = &mpu6050_dmp_get_pry;
 	mpu6050->power_off = &mpu6050_dmp_power_off;
+	mpu6050->zero	   = &mpu6050_dmp_zero;
 
 	register_dev_obj("mpu",mpu6050);
 }

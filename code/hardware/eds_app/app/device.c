@@ -66,7 +66,7 @@ void device_init(void) {
 
 	mpu6050dmp_obj *mpu6050 = get_device("mpu");
 	if(mpu6050 != NULL) {
-		//mpu6050->init(mpu6050);
+		mpu6050->init(mpu6050);
 //		mpu6050->power_off(mpu6050);
 	}
 
